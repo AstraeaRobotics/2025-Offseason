@@ -9,29 +9,34 @@ import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.Constants.AlgaeConstants.AlgaeStates;
-import frc.robot.Constants.ClimbConstants.ClimbStates;
 import frc.robot.Constants.CoralConstants.CoralStates;
+import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorStates;
+import frc.robot.commands.coral.*;
 import frc.robot.commands.algae.IncrementAlgaeSetpoint;
 import frc.robot.commands.algae.IntakeAlgae;
 import frc.robot.commands.algae.SetAlgaeState;
+import frc.robot.commands.auto.paths.L1Mid;
+import frc.robot.commands.auto.paths.LL1Side;
+import frc.robot.commands.auto.paths.LL2Side;
+import frc.robot.commands.auto.paths.RL1Side;
+import frc.robot.commands.auto.paths.RL2Side;
 import frc.robot.commands.elevator.IncrementSetpoint;
 import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
-import frc.robot.commands.swerve.TeleopSwerve;
-import frc.robot.commands.vision.AlignX;
-import frc.robot.subsystems.*;
-import frc.robot.commands.auto.paths.*;
-import frc.robot.commands.coral.*;
+import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.subsystems.AlgaeSubsystem;
+import frc.robot.subsystems.CoralSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -85,6 +90,7 @@ public class RobotContainer {
   private final Command m_RL2Side = new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   private final Command m_LL2Side = new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
 
+  private boolean isSlowModeOn = false; 
 
   // private final CommandXboxController m_driverController =
   //     new CommandXboxController(OperatorConstants.kDriverControllerPort);
@@ -99,7 +105,14 @@ public class RobotContainer {
 
     SmartDashboard.putData("Auto choices", chooser);
 
-    m_SwerveSubsystem.setDefaultCommand(new TeleopSwerve(m_SwerveSubsystem, m_Controller::getLeftX, m_Controller::getLeftY, m_Controller::getRightX, m_Controller::getR2Axis));
+    m_SwerveSubsystem.setDefaultCommand(new TeleopSwerveNEW(
+      m_SwerveSubsystem,
+      m_Controller::getLeftX,
+      m_Controller::getLeftY,
+      m_Controller::getRightX,
+      () -> isSlowModeOn  
+    ));
+
     configureBindings();
   }
 
@@ -119,10 +132,14 @@ public class RobotContainer {
     kR1.whileTrue(new IntakeCoral(m_coralSubsystem, -5));
     kL1.whileTrue(new IntakeCoral(m_coralSubsystem, 5));
     kTriangle.whileTrue(new ExtakeL1(m_coralSubsystem));
-    kSquare.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, 5));
-    kCircle.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, -5));
+    kR2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, -5));
+    kL2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, 5));
     // kSquare.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, -4));
     // kCircle.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, 4));
+
+    kSquare.onTrue(new InstantCommand(() -> {
+      isSlowModeOn = !isSlowModeOn;
+    }));
 
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
@@ -147,11 +164,6 @@ public class RobotContainer {
     kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
   }
 
-  /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
-   */
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return chooser.getSelected();
