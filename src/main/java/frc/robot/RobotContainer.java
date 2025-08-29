@@ -19,7 +19,7 @@ import frc.robot.Constants.AlgaeConstants.AlgaeStates;
 import frc.robot.Constants.CoralConstants.CoralStates;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorStates;
-import frc.robot.commands.coral.*;
+import frc.robot.commands.Coral.*;
 import frc.robot.commands.algae.IncrementAlgaeSetpoint;
 import frc.robot.commands.algae.IntakeAlgae;
 import frc.robot.commands.algae.SetAlgaeState;

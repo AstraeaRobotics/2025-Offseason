@@ -23,6 +23,7 @@ public class TeleopSwerveNEW extends Command {
   DoubleSupplier m_rotation;
 
   private final BooleanSupplier slowModeSupplier;
+  private boolean lastSlowMode = false;
 
   public TeleopSwerveNEW(SwerveSubsystem swerveSub, DoubleSupplier driveX, DoubleSupplier driveY, DoubleSupplier rotation, BooleanSupplier slowModeSupplier) {
     // Use addRequirements() here to declare subsystem dependencies.
@@ -37,13 +38,30 @@ public class TeleopSwerveNEW extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    lastSlowMode = false;
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   
   public void execute() {
     boolean slowMode = slowModeSupplier.getAsBoolean();
+
+    if (slowMode!= lastSlowMode) {
+      if (slowMode) {
+        System.out.println("Slow Mode ON");
+        SmartDashboard.putString("Drive Mode", "SLOW");
+      }
+
+      else {
+        System.out.println("Slow Mode Off");
+        SmartDashboard.putString("Drive Mode", "NORMAL");
+      }
+
+      lastSlowMode = slowMode;
+    }
+    
 
     if (Math.abs(m_driveX.getAsDouble()) > 0.2 || Math.abs(m_driveY.getAsDouble()) > 0.2) {
       m_SwerveSubsystem.drive(

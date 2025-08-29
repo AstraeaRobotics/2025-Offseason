@@ -5,9 +5,16 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+import org.opencv.core.Size;
+import org.opencv.videoio.VideoWriter;
+
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.CvSink;
+import edu.wpi.first.cscore.UsbCamera;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -26,7 +33,21 @@ public class Robot extends TimedRobot {
   public Robot() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    CameraServer.startAutomaticCapture();
+    UsbCamera camera = CameraServer.startAutomaticCapture();
+    CvSink imageStream = CameraServer.getVideo();
+
+    final int CAMFPS = 30;
+    final int[] CAMRES = {1280, 720}; 
+
+    camera.setResolution(CAMRES[0],CAMRES[1]);
+    camera.setFPS(CAMFPS);
+
+    String filename = "/home/lvuser/" + Timer.getTimestamp() + ".avi";
+
+    //temp video saving code
+    int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
+    VideoWriter videoWriter = new VideoWriter(filename, fourcc, CAMFPS, new Size(CAMRES[0], CAMRES[1]));
+
     m_robotContainer = new RobotContainer();
   }
 
@@ -81,7 +102,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    
+  }
 
   @Override
   public void testInit() {
