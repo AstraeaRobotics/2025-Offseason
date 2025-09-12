@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -28,12 +29,14 @@ import frc.robot.commands.auto.paths.LL1Side;
 import frc.robot.commands.auto.paths.LL2Side;
 import frc.robot.commands.auto.paths.RL1Side;
 import frc.robot.commands.auto.paths.RL2Side;
+import frc.robot.commands.climb.SpinClimbMotor;
 import frc.robot.commands.elevator.IncrementSetpoint;
 import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
 import frc.robot.subsystems.AlgaeSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -50,7 +53,7 @@ public class RobotContainer {
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final AlgaeSubsystem m_AlgaeSubsystem = new AlgaeSubsystem();
   private final ElevatorSubsystem m_ElevatorSubsystem = new ElevatorSubsystem();
-  // private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem();
+  private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem();
 
   private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
@@ -92,9 +95,6 @@ public class RobotContainer {
 
   private boolean isSlowModeOn = false; 
 
-  // private final CommandXboxController m_driverController =
-  //     new CommandXboxController(OperatorConstants.kDriverControllerPort);
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     chooser.setDefaultOption("L1 Mid", m_L1Mid);
@@ -134,8 +134,8 @@ public class RobotContainer {
     kTriangle.whileTrue(new ExtakeL1(m_coralSubsystem));
     kR2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, -5));
     kL2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, 5));
-    // kSquare.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, -4));
-    // kCircle.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, 4));
+    kSquare.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, -4));
+    kCircle.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, 4));
 
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
@@ -156,12 +156,21 @@ public class RobotContainer {
     kOperator6.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kAl1), new SetAlgaeState(m_AlgaeSubsystem, AlgaeStates.kL1), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // AL1
     kOperator7.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kAL2), new SetAlgaeState(m_AlgaeSubsystem, AlgaeStates.kL2), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // AL2
     kOperator8.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kAl3), new SetAlgaeState(m_AlgaeSubsystem, AlgaeStates.kL3), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // AL3
-    // kOperator9.whileTrue(new AlignX(m_SwerveSubsystem, VisionConstants.kLeftOffset)); // AL
-    // kOperator10.whileTrue(new AlignX(m_SwerveSubsystem, VisionConstants.kRightOffset)); // AR
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
-    kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
-    kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
+    // kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
+    // kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
+
+    kOperator11.onTrue(new InstantCommand(() -> {
+      SmartDashboard.putBoolean("Record Video", true);
+      DriverStation.reportWarning("Camera recording STARTED", false);
+    }));
+
+    kOperator12.onTrue(new InstantCommand(() -> {
+      SmartDashboard.putBoolean("Record Video", false);
+      DriverStation.reportWarning("Camera recording STOPPED", false);
+    }));
+
   }
 
   public Command getAutonomousCommand() {
