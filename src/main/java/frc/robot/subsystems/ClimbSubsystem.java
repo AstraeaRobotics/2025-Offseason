@@ -25,16 +25,15 @@
 
 // public class ClimbSubsystem extends SubsystemBase {
 
-//   /** Creates a new ClimbSubsystem. */
 //   private TalonFX m_climbMotor;
-  
-//   Slot0Configs m_climbConfigs;
-//   PositionVoltage m_climbPosition;
-//   VelocityVoltage m_climbVelocity;
-//   // VelocityVoltage m_climbVelocity;
-//   ClimbStates m_climbState;
-//   double desiredSetpoint;  
-//   NeutralOut brake;
+//   private Slot0Configs m_climbConfigs;
+//   private PositionVoltage m_climbPosition;
+//   private VelocityVoltage m_climbVelocity;
+
+//   private ClimbStates m_climbState;
+//   private double desiredSetpoint;
+
+//   private double lastAppliedVoltage = 0.0;
 
 //   public ClimbSubsystem() {
 //     m_climbMotor = new TalonFX(7);
@@ -64,16 +63,18 @@
 //     // current limit
 
 //     CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
-
-//     currentLimits.SupplyCurrentLimit = 70.0; 
+//     currentLimits.SupplyCurrentLimit = 100.0; // safe starting point
 //     currentLimits.SupplyCurrentLimitEnable = true;
-
-//     currentLimits.StatorCurrentLimit = 80.0;
+    
+//     currentLimits.StatorCurrentLimit = 100.0;
 //     currentLimits.StatorCurrentLimitEnable = true;
+
+//     m_climbMotor.getConfigurator().apply(currentLimits);
+
+//     m_climbMotor.setPosition(0);
 
 //     m_climbMotor.setNeutralMode(NeutralModeValue.Brake);
 //     m_climbMotor.getConfigurator().apply(m_climbConfigs);
-//     m_climbMotor.getConfigurator().apply(currentLimits);
 
 //     m_climbMotor.setPosition(0);
 //   }
@@ -91,25 +92,37 @@
 //     return m_climbMotor.getClosedLoopError().getValueAsDouble();
 //   }
 
-//   public double getClimbVelocity() {
+// public double getClimbVelocity() {
 //     return m_climbMotor.getVelocity().getValueAsDouble();
-// }
-
-//   public void setPivotVoltage(double voltage) {
-//     m_climbMotor.setVoltage(voltage);
 //   }
 
-//   public void setClimbState (ClimbStates tempState) {
+// public double getClimbCurrent() {
+//     return m_climbMotor.getSupplyCurrent().getValueAsDouble();
+//   }
+
+// public double getAppliedVoltage() {
+//     return lastAppliedVoltage;
+//   }
+
+// public void setPivotVoltage(double voltage) {
+//     m_climbMotor.setVoltage(voltage);
+//     lastAppliedVoltage = voltage;
+//   }
+
+// public void setClimbState(ClimbStates tempState) {
 //     m_climbState = tempState;
 //     desiredSetpoint = m_climbState.getClimbSetpoint();
 //   }
 
-//   @Override
+// @Override
 //   public void periodic() {
-//     // This method will be called once per scheduler run
-//     SmartDashboard.putNumber("Climb Position", getClimbPosition());
-//     SmartDashboard.putNumber("Climb Velocity", getClimbVelocity());
 //     spinClimbMotorPosition(desiredSetpoint);
+
+//     // Send telemetry for Glass
+//     SmartDashboard.putNumber("Climb/Position", getClimbPosition());
+//     SmartDashboard.putNumber("Climb/Velocity", getClimbVelocity());
+//     SmartDashboard.putNumber("Climb/Current", getClimbCurrent());
+//     SmartDashboard.putNumber("Climb/Voltage", getAppliedVoltage());
 //   }
 // }
 
