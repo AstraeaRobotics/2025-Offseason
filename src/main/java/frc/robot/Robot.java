@@ -10,14 +10,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
-import org.opencv.core.CvType;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.videoio.VideoWriter;
-
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.cscore.CvSink;
-import edu.wpi.first.cscore.UsbCamera;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -29,40 +21,11 @@ public class Robot extends TimedRobot {
 
   private final RobotContainer m_robotContainer;
 
-  private VideoWriter m_videoWriter; //used to save videos to the RIO from the Robot's USB Cam
-  private CvSink m_videoSource;
-  private int kCamFPS;
-  private int[] kCamRes;
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-
-  private void setUpCamera(int fps, int[] resolution){
-    kCamFPS = fps;
-    kCamRes = resolution;
-
-    //MAYBE ONLY USE CVSINK IF USING BOTH HAS PERFORMANCE IMPACT
-    UsbCamera camera = CameraServer.startAutomaticCapture(); //used for dashboards
-    camera.setResolution(kCamRes[0],kCamRes[1]);
-
-    //Set this to the native FPS to avoid firmware errors 
-    camera.setFPS(30);
-
-    m_videoSource = CameraServer.getVideo();
-
-    String filename = "/home/lvuser/" + System.nanoTime() + ".avi";
-
-    //temp video saving code
-    int fourcc = VideoWriter.fourcc('M', 'J', 'P', 'G');
-    m_videoWriter = new VideoWriter(filename, fourcc, kCamFPS, new Size(kCamRes[0], kCamRes[1]));
-  }
-
   public Robot() {
-
-    setUpCamera(1, new int[] {640, 480}); //
-    SmartDashboard.putBoolean("Record Video", false);
     m_robotContainer = new RobotContainer();
   }
 
@@ -119,28 +82,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {
-
-    boolean record = SmartDashboard.getBoolean("Record Video", false);
-
-    if(record){
-      long currentTimeMicroseconds = (long) (Timer.getTimestamp() * 1000000); 
-      int microsecBetweenFrames = 1000000 / kCamFPS; //1000000 is the microsec in 1 sec 
-
-      if(currentTimeMicroseconds - m_videoSource.getLastFrameTime() >= microsecBetweenFrames){
-        System.out.println(currentTimeMicroseconds);
-        System.out.println(m_videoSource.getLastFrameTime());
-        System.out.println();
-        Mat frame = new Mat();
-        long timestamp = m_videoSource.grabFrame(frame);
-
-        if(timestamp != 0){
-          m_videoWriter.write(frame);
-        }
-      }
-    }
-
-  }
+  public void teleopPeriodic() {}
 
   @Override
   public void testInit() {
