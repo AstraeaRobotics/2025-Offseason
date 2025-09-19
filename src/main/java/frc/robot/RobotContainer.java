@@ -24,6 +24,7 @@ import frc.robot.commands.Coral.*;
 import frc.robot.commands.algae.IncrementAlgaeSetpoint;
 import frc.robot.commands.algae.IntakeAlgae;
 import frc.robot.commands.algae.SetAlgaeState;
+import frc.robot.commands.auto.components.DriveToDistanceNew;
 import frc.robot.commands.auto.paths.L1Mid;
 import frc.robot.commands.auto.paths.LL1Side;
 import frc.robot.commands.auto.paths.LL2Side;
@@ -160,6 +161,8 @@ public class RobotContainer {
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
     // kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
     // kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
+
+    // kOperator12.onTrue(new DriveToDistanceNew(m_SwerveSubsystem, 1, 0, 0));
 
   }
 
