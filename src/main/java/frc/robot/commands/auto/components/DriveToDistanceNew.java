@@ -46,11 +46,10 @@ public class DriveToDistanceNew extends Command {
     rotationController.enableContinuousInput(0, 360);
 
     double speedMultiplier = 0.5;
-    double baseX = 0.05 * Math.abs(m_xDistanceMeters);
-    double baseY = 0.05 * Math.abs(m_yDistanceMeters);
-
-    xDriveSpeed = baseX * Math.signum(m_xDistanceMeters) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
-    yDriveSpeed = baseY * Math.signum(-m_yDistanceMeters) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
+    
+    // Fixed: Added the missing +0.7 base speed component to match original
+    xDriveSpeed = (0.05 * m_xDistanceMeters + 0.7) * Math.signum(m_xDistanceMeters) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
+    yDriveSpeed = (0.05 * m_yDistanceMeters + 0.7) * Math.signum(-m_yDistanceMeters) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
 
     SmartDashboard.putNumber("DriveToDistanceNew/Target X (m)", Math.abs(m_xDistanceMeters));
     SmartDashboard.putNumber("DriveToDistanceNew/Target Y (m)", Math.abs(m_yDistanceMeters));
