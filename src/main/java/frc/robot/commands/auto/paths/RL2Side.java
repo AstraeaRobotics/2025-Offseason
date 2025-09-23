@@ -31,7 +31,7 @@ public class RL2Side extends SequentialCommandGroup {
     // 50.5 INCHES
     // 2.73, -1.0+
     addCommands(
-    new ParallelDeadlineGroup(new WaitCommand(2.7), new TurnWheelsAndDrive(m_SwerveSubsystem, 0, 2.73, 0)), 
+    new ParallelDeadlineGroup(new WaitCommand(2.7), new TurnWheelsAndDrive(m_SwerveSubsystem, 0, 2.41, 0)), 
     new ParallelDeadlineGroup(new WaitCommand(1.5), new TurnToAngle(m_SwerveSubsystem, 300)), 
     new ParallelDeadlineGroup(new WaitCommand(1), new SetCoralState(m_CoralSubsystem, CoralStates.kL2), new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL2)), 
     new ParallelDeadlineGroup(new WaitCommand(2.7), new TurnWheelsAndDrive(m_SwerveSubsystem, -1, 0, 300)), 

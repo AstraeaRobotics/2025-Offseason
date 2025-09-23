@@ -24,20 +24,17 @@ import frc.robot.commands.Coral.*;
 import frc.robot.commands.algae.IncrementAlgaeSetpoint;
 import frc.robot.commands.algae.IntakeAlgae;
 import frc.robot.commands.algae.SetAlgaeState;
-import frc.robot.commands.auto.components.DriveToDistanceNew;
 import frc.robot.commands.auto.paths.L1Mid;
 import frc.robot.commands.auto.paths.LL1Side;
 import frc.robot.commands.auto.paths.LL2Side;
 import frc.robot.commands.auto.paths.RL1Side;
 import frc.robot.commands.auto.paths.RL2Side;
-// import frc.robot.commands.climb.SpinClimbMotor;
 import frc.robot.commands.elevator.IncrementSetpoint;
 import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
 import frc.robot.subsystems.AlgaeSubsystem;
-// import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -54,7 +51,6 @@ public class RobotContainer {
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final AlgaeSubsystem m_AlgaeSubsystem = new AlgaeSubsystem();
   private final ElevatorSubsystem m_ElevatorSubsystem = new ElevatorSubsystem();
-  // private final ClimbSubsystem m_ClimbSubsystem = new ClimbSubsystem();
 
   private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
@@ -135,8 +131,6 @@ public class RobotContainer {
     kTriangle.whileTrue(new ExtakeL1(m_coralSubsystem));
     kR2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, -5));
     kL2.whileTrue(new IntakeAlgae(m_AlgaeSubsystem, 5));
-    // kSquare.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, -4));
-    // kCircle.whileTrue(new SpinClimbMotor(m_ClimbSubsystem, 4));
 
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
@@ -159,8 +153,8 @@ public class RobotContainer {
     kOperator8.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kAl3), new SetAlgaeState(m_AlgaeSubsystem, AlgaeStates.kL3), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // AL3
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
-    // kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
-    // kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
+    kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
+    kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
 
     // kOperator12.onTrue(new DriveToDistanceNew(m_SwerveSubsystem, 1, 0, 0));
 
