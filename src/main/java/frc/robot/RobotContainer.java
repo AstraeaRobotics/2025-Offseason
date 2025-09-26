@@ -25,6 +25,7 @@ import frc.robot.commands.algae.IncrementAlgaeSetpoint;
 import frc.robot.commands.algae.IntakeAlgae;
 import frc.robot.commands.algae.SetAlgaeState;
 import frc.robot.commands.auto.paths.L1Mid;
+import frc.robot.commands.auto.paths.L1MidPP;
 import frc.robot.commands.auto.paths.LL1Side;
 import frc.robot.commands.auto.paths.LL2Side;
 import frc.robot.commands.auto.paths.RL1Side;
@@ -39,6 +40,9 @@ import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.*;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -51,6 +55,8 @@ public class RobotContainer {
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final AlgaeSubsystem m_AlgaeSubsystem = new AlgaeSubsystem();
   private final ElevatorSubsystem m_ElevatorSubsystem = new ElevatorSubsystem();
+
+
 
   private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
@@ -85,6 +91,7 @@ public class RobotContainer {
   SendableChooser<Command> chooser = new SendableChooser<>();
 
   private final Command m_L1Mid = new L1Mid(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  private final Command m_L1MidPP = new L1MidPP(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   private final Command m_RL1Side = new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   private final Command m_LL1Side = new LL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   private final Command m_RL2Side = new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
@@ -95,6 +102,7 @@ public class RobotContainer {
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     chooser.setDefaultOption("L1 Mid", m_L1Mid);
+    chooser.addOption("L1Mid PP", m_L1MidPP);
     chooser.addOption("RL1 Side", m_RL1Side);
     chooser.addOption("LL1 Side", m_LL1Side);
     chooser.addOption("RL2 Side", m_RL2Side);
@@ -111,6 +119,8 @@ public class RobotContainer {
     ));
 
     configureBindings();
+
+    NamedCommands.registerCommand("ExtakeL1", new ExtakeL1(m_coralSubsystem));
   }
 
   /**
@@ -153,8 +163,8 @@ public class RobotContainer {
     kOperator8.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kAl3), new SetAlgaeState(m_AlgaeSubsystem, AlgaeStates.kL3), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // AL3
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
-    kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
-    kOperator12.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, -0.1));
+    // kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
+    kOperator12.onTrue(m_L1MidPP); // PathPlanner L1 Mid Auto
 
     // kOperator12.onTrue(new DriveToDistanceNew(m_SwerveSubsystem, 1, 0, 0));
 

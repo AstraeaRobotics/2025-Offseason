@@ -10,11 +10,11 @@ import com.fasterxml.jackson.databind.ser.std.NumberSerializers.DoubleSerializer
 import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.servohub.ServoHub.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
-// import com.pathplanner.lib.auto.AutoBuilder;
-// import com.pathplanner.lib.config.PIDConstants;
-// import com.pathplanner.lib.config.RobotConfig;
-// import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import com.revrobotics.spark.config.SparkMaxConfig;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.*;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -51,7 +51,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   DoubleSupplier m_driveX;
 
-  // RobotConfig config;
+  RobotConfig config;
 
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
@@ -66,28 +66,28 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(getHeading()), getModulePositions(), new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
     publisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
     
-    // try{
-    //   config = RobotConfig.fromGUISettings();
-    // } catch (Exception e) {
-    //   // Handle exception as needed
-    //   e.printStackTrace();
-    // }
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
 
-    // AutoBuilder.configure(
-    //   this::getPose, 
-    //   this::resetRobotPose, 
-    //   this::getRobotRelativeSpeeds, 
-    //   (speeds, feedforwards) -> drive(speeds, true), 
-    //   new PPHolonomicDriveController(new PIDConstants(2.1, 0, 0), new PIDConstants(2.0, 0, 0.1)), 
-    //   config,
-    //   () -> {
-    //   // var alliance = DriverStation.getAlliance();
-    //   // if (alliance.isPresent()) {
-    //   //   return alliance.get() == DriverStation.Alliance.Red;
-    //   // }
-    //   return false;
-    // },
-    // this);
+    AutoBuilder.configure(
+      this::getPose, 
+      this::resetRobotPose, 
+      this::getRobotRelativeSpeeds, 
+      (speeds, feedforwards) -> drive(speeds, true), 
+      new PPHolonomicDriveController(new PIDConstants(2.1, 0, 0), new PIDConstants(2.0, 0, 0.1)), 
+      config,
+      () -> {
+      // var alliance = DriverStation.getAlliance();
+      // if (alliance.isPresent()) {
+      //   return alliance.get() == DriverStation.Alliance.Red;
+      // }
+      return false;
+    },
+    this);
 
     gyro.reset();
   }
