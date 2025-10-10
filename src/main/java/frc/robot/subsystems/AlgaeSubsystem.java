@@ -49,9 +49,9 @@ public class AlgaeSubsystem extends SubsystemBase {
   
   
   public AlgaeSubsystem() {
-    m_pivot = new SparkMax(AlgaeConstants.kPivotPort, MotorType.kBrushless);
-    m_intakeL = new SparkMax(AlgaeConstants.kIntakePortL, MotorType.kBrushless);
-    m_intakeR = new SparkMax(AlgaeConstants.kIntakePortR, MotorType.kBrushless);
+    m_pivot = new SparkMax(6, MotorType.kBrushless);
+    m_intakeL = new SparkMax(4, MotorType.kBrushless);
+    m_intakeR = new SparkMax(5, MotorType.kBrushless);
     
     //  14
     m_pid = new ProfiledPIDController(16.0, 0, 1.0, new TrapezoidProfile.Constraints(0.4, 0.8));

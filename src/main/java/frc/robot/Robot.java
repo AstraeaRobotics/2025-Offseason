@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,6 +24,7 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
+    CameraServer.startAutomaticCapture();
     m_robotContainer = new RobotContainer();
 }
 

@@ -164,7 +164,7 @@ public class RobotContainer {
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
     // kOperator11.onTrue(new IncrementAlgaeSetpoint(m_AlgaeSubsystem, 0.1));
-    kOperator12.onTrue(m_L1MidPP); // PathPlanner L1 Mid Auto
+    // kOperator12.onTrue(m_L1MidPP); // PathPlanner L1 Mid Auto
 
     // kOperator12.onTrue(new DriveToDistanceNew(m_SwerveSubsystem, 1, 0, 0));
 
@@ -178,6 +178,5 @@ public class RobotContainer {
     // return new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
     // return new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
     // return new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    
   }
 }
