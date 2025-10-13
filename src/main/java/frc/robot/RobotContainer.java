@@ -22,7 +22,6 @@ import frc.robot.Constants.AlgaeConstants.AlgaeStates;
 import frc.robot.Constants.ClimbConstants.ClimbStates;
 import frc.robot.Constants.CoralConstants.CoralStates;
 import frc.robot.Constants.ElevatorConstants.ElevatorStates;
-import com.pathplanner.lib.auto.AutoBuilder;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -90,44 +89,44 @@ public class RobotContainer {
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
+    NamedCommands.registerCommand("RaiseToL1", 
+      new ParallelCommandGroup(
+        new SetCoralState(m_coralSubsystem, CoralStates.kL1),
+        new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL1)
+      ));
+  
+    NamedCommands.registerCommand("RaiseToL2", 
+      new ParallelCommandGroup(
+        new SetCoralState(m_coralSubsystem, CoralStates.kL2),
+        new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL2)
+      ));
+  
+    NamedCommands.registerCommand("ScoreCoralL1", 
+      new ParallelDeadlineGroup(
+        new WaitCommand(1.0),
+        new ExtakeL1(m_coralSubsystem)
+      ));
+  
+    NamedCommands.registerCommand("ScoreCoral", 
+      new ParallelDeadlineGroup(
+        new WaitCommand(1.0),
+        new IntakeCoral(m_coralSubsystem, -5)
+      ));
+  
     chooser.setDefaultOption("L1 Mid (OLD)", m_L1Mid);
     chooser.addOption("RL1 Side (OLD)", m_RL1Side);
     chooser.addOption("LL1 Side (OLD)", m_LL1Side);
     chooser.addOption("RL2 Side (OLD)", m_RL2Side);
     chooser.addOption("LL2Side (OLD)", m_LL2Side);
-
+  
     chooser.addOption("L1Mid PP", AutoBuilder.buildAuto("L1Mid"));
     chooser.addOption("BRL2 PP", AutoBuilder.buildAuto("BRL2"));
     chooser.addOption("BRL1 PP", AutoBuilder.buildAuto("BRL1"));
     chooser.addOption("BLL2 PP", AutoBuilder.buildAuto("BLL2"));
     chooser.addOption("BLL1 PP", AutoBuilder.buildAuto("BLL1"));
-
+  
     SmartDashboard.putData("Auto choices", chooser);
-
-    NamedCommands.registerCommand("RaiseToL1", 
-    new ParallelCommandGroup(
-      new SetCoralState(m_coralSubsystem, CoralStates.kL1),
-      new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL1)
-    ));
-
-    NamedCommands.registerCommand("RaiseToL2", 
-    new ParallelCommandGroup(
-      new SetCoralState(m_coralSubsystem, CoralStates.kL2),
-      new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL2)
-    ));
-
-    NamedCommands.registerCommand("ScoreCoralL1", 
-    new ParallelDeadlineGroup(
-      new WaitCommand(1.0),
-      new ExtakeL1(m_coralSubsystem)
-    ));
-
-    NamedCommands.registerCommand("ScoreCoral", 
-    new ParallelDeadlineGroup(
-      new WaitCommand(1.0),
-      new IntakeCoral(m_coralSubsystem, -5)
-    ));
-
+  
     m_SwerveSubsystem.setDefaultCommand(new TeleopSwerve(m_SwerveSubsystem, m_Controller::getLeftX, m_Controller::getLeftY, m_Controller::getRightX, m_Controller::getR2Axis));
     configureBindings();
   }

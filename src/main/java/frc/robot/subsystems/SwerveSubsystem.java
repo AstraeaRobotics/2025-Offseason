@@ -27,6 +27,7 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
@@ -53,6 +54,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   RobotConfig config;
 
+  private final Field2d m_field = new Field2d();
+
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS();
@@ -65,6 +68,8 @@ public class SwerveSubsystem extends SubsystemBase {
     
     swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(getHeading()), getModulePositions(), new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
     publisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
+
+    SmartDashboard.putData("Field", m_field);
     
     try{
       config = RobotConfig.fromGUISettings();
@@ -153,8 +158,18 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
-    // SmartDashboard.putNumber("heading", getHeading());
+    
+    // Publish pose to NetworkTables (already have this)
+    publisher.set(getPose());
 
+    m_field.setRobotPose(getPose());
+    
+    // ADD THESE LINES for SmartDashboard:
+    SmartDashboard.putNumber("Robot X", getPose().getX());
+    SmartDashboard.putNumber("Robot Y", getPose().getY());
+    SmartDashboard.putNumber("Robot Heading", getPose().getRotation().getDegrees());
+
+    SmartDashboard.putString("Robot Pose", getPose().toString());
 
     // LimelightHelpers.SetRobotOrientation("limelight", swerveDrivePoseEstimator.getEstimatedPosition().getRotation().getDegrees(), 0, 0, 0, 0, 0);
     // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
@@ -174,6 +189,5 @@ public class SwerveSubsystem extends SubsystemBase {
     //       mt2.pose,
     //       mt2.timestampSeconds);
     // }
-    publisher.set(getPose());
   }
 }
