@@ -32,6 +32,7 @@ import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.vision.AutoAlign;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -172,6 +173,8 @@ public class RobotContainer {
       isSlowModeOn = !isSlowModeOn;
     }));
 
+    kCircle.onTrue(new AutoAlign(m_SwerveSubsystem, true));
+
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
@@ -187,6 +190,8 @@ public class RobotContainer {
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
 
+    
+    
   }
 
   public Command getAutonomousCommand() {
