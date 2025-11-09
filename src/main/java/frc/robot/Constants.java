@@ -51,37 +51,6 @@ public final class Constants {
     }
   }
 
-  public static class AlgaeConstants {
-    public static final int kPivotPort = 6;
-    public static final double kP = 10.0;
-    
-    public static final int kIntakePortL = 4;
-    public static final int kIntakePortR = 5;
-
-    public static final double intakeKS = 0;
-    public static final double intakeKV = 0;
-    public static final double intakeKA = 0;
-    
-    public static final double pivotKG = 1.2;
-  
-    
-    public enum AlgaeStates{
-      kL1(0.15),
-      kL2(0.27),
-      kL3(0.35),
-      kIn(0);
-
-      private double kPivotPos;
-
-      private AlgaeStates(double pivotpos){
-        kPivotPos = pivotpos;
-      }
-
-      public double getPivotPos(){
-        return kPivotPos;
-      }
-    }
-  }
   public static class ElevatorConstants{
     //public static final double kEncoderConversionFactor = 2 *Math.PI * 2;
     public static final double kEncoderConversionFactor = 2*Math.PI;

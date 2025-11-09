@@ -3,41 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 8.121,
-        "y": 4.063486842105263
+        "x": 7.926749999999999,
+        "y": 5.31
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.109188776219093,
-        "y": 4.136158685245812
+        "x": 8.324567424911757,
+        "y": 5.074654543684646
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 6.421,
-        "y": 4.063
+        "x": 6.549467314611486,
+        "y": 6.010410169336362
       },
       "prevControl": {
-        "x": 6.645312853675408,
-        "y": 3.9526200032796015
+        "x": 6.799182546794122,
+        "y": 5.998481094939241
       },
       "nextControl": {
-        "x": 6.196687146324593,
-        "y": 4.173379996720398
+        "x": 6.29975208242885,
+        "y": 6.022339243733483
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.016994863013698,
-        "y": 3.0483304794520545
+        "x": 5.342162999157761,
+        "y": 5.170709579719403
       },
       "prevControl": {
-        "x": 7.886521922842098,
-        "y": 2.7221214510845413
+        "x": 5.158332900535162,
+        "y": 5.001279668427431
       },
       "nextControl": null,
       "isLocked": false,
@@ -47,32 +47,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Scoring",
-      "waypointRelativePos": 1.048128342245991,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "deadline",
-        "data": {
-          "commands": [
-            {
-              "type": "wait",
-              "data": {
-                "waitTime": 3.0
-              }
-            },
-            {
-              "type": "named",
-              "data": {
-                "name": "ExtakeL1"
-              }
-            }
-          ]
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.0,
     "maxAcceleration": 3.0,
@@ -83,7 +58,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": -119.66308866226406
   },
   "reversed": false,
   "folder": null,

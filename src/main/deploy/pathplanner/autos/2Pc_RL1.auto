@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "RaiseToL1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RL12Side"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreCoralL1"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RL12toCS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "IntakeCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CStoRL12"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

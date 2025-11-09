@@ -1,9 +1,12 @@
 {
+<<<<<<< HEAD
   "System Joysticks": {
     "window": {
       "enabled": false
     }
   },
+=======
+>>>>>>> reefscape-pathplanner
   "keyboardJoysticks": [
     {
       "axisConfig": [
