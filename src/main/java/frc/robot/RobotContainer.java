@@ -36,6 +36,7 @@ import frc.robot.commands.vision.AutoAlign;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -52,6 +53,7 @@ public class RobotContainer {
   private final SwerveSubsystem m_SwerveSubsystem = new SwerveSubsystem();
   private final CoralSubsystem m_coralSubsystem = new CoralSubsystem();
   private final ElevatorSubsystem m_ElevatorSubsystem = new ElevatorSubsystem();
+  private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
 
   private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
@@ -169,11 +171,11 @@ public class RobotContainer {
     kL1.whileTrue(new IntakeCoral(m_coralSubsystem, 5));
     kTriangle.whileTrue(new ExtakeL1(m_coralSubsystem));
 
+    kCircle.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem));
+
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
     }));
-
-    kCircle.onTrue(new AutoAlign(m_SwerveSubsystem, true));
 
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));

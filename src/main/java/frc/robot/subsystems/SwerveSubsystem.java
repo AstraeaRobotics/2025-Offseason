@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.utils.LimelightHelpers;
 
 public class SwerveSubsystem extends SubsystemBase {
   
@@ -47,10 +46,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public double rotationalKP = 2.0; 
   public double rotationalKD = 0.1; 
 
-  // PID Controllers for auto-align
-  private PIDController translationalXController;
-  private PIDController translationalYController;
-  private PIDController rotationalController;
+  // PID Controllers for auto-align (moved to VisionSubsystem)
+  // Removed - vision logic now in VisionSubsystem
 
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
@@ -72,14 +69,6 @@ public class SwerveSubsystem extends SubsystemBase {
     publisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
 
     SmartDashboard.putData("Field", m_field);
-    
-    // Initialize PID controllers
-    translationalXController = new PIDController(translationalKP, 0, 0);
-    translationalYController = new PIDController(translationalKP, 0, 0);
-    rotationalController = new PIDController(rotationalKP, 0, rotationalKD);
-    
-    // Enable continuous input for rotation (-180 to 180 degrees)
-    rotationalController.enableContinuousInput(-180, 180);
     
     try{
       config = RobotConfig.fromGUISettings();
@@ -162,22 +151,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
   public double getEncoderPosition() {
     return swerveModules[0].getDistance();
-  }
-
-  public void autoAlign(Pose2d targetPose, boolean slowMode) {
-    Pose2d currentPose = getPose();
-
-    double vx = translationalXController.calculate(currentPose.getX(), targetPose.getX());
-    double vy = translationalYController.calculate(currentPose.getY(), targetPose.getY());
-    
-    double omega = Math.toRadians(
-      rotationalController.calculate(
-        currentPose.getRotation().getDegrees(), 
-        targetPose.getRotation().getDegrees()
-      )
-    );
-
-    drive(new ChassisSpeeds(vx, vy, omega), slowMode);
   }
 
   @Override

@@ -1,99 +1,76 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.commands.vision;
 
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.utils.LimelightHelpers;
+import frc.robot.subsystems.VisionSubsystem;
 
+/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class AutoAlign extends Command {
-    private final SwerveSubsystem m_SwerveSubsystem;
-    private final boolean slowMode;
-    private final double TARGET_DISTANCE = 0.305; // 1 foot in meters
+  /** Creates a new AutoAlign. */
 
-    public AutoAlign(SwerveSubsystem swerveSubsystem, boolean slowMode) {
-        this.m_SwerveSubsystem = swerveSubsystem;
-        this.slowMode = slowMode;
-        addRequirements(swerveSubsystem);
+  private final SwerveSubsystem m_SwerveSubsystem;
+  private final VisionSubsystem m_VisionSubsystem;
+
+  public AutoAlign(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem) {
+    // Use addRequirements() here to declare subsystem dependencies.
+    this.m_SwerveSubsystem = m_SwerveSubsystem;
+    this.m_VisionSubsystem = m_VisionSubsystem;
+
+    addRequirements(m_SwerveSubsystem, m_VisionSubsystem);
+  }
+
+  // Called when the command is initially scheduled.
+  @Override
+  public void initialize() {
+    System.out.println("Auto-align started");
+    m_VisionSubsystem.resetAlignmentControllers();
+    SmartDashboard.putString("Auto-Align Status", "STARTING");
+  }
+
+  // Called every time the scheduler runs while the command is scheduled.
+  @Override
+  public void execute() {
+    if (!m_VisionSubsystem.hasTarget()) {
+      m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true);
+      SmartDashboard.putString("Auto-Align Status", "NO TARGET");
+      return;
+  }
+
+  double[] speeds = m_VisionSubsystem.calculateAlignmentSpeeds();
+  double vx = speeds[0];    
+  double vy = speeds[1];  
+  double omega = speeds[2]; 
+  
+  m_SwerveSubsystem.drive(new ChassisSpeeds(vx, vy, omega), true);
+  
+  SmartDashboard.putString("Auto-Align Status", "ALIGNING");
+  }
+
+  // Called once the command ends or is interrupted.
+  @Override
+  public void end(boolean interrupted) {
+    m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true);
+    
+    if (interrupted) {
+        System.out.println("Auto-align interrupted");
+        SmartDashboard.putString("Auto-Align Status", "INTERRUPTED");
+    } 
+    
+    else {
+        System.out.println("Auto-align complete");
+        SmartDashboard.putString("Auto-Align Status", "ALIGNED");
     }
+  }
 
-    @Override
-    public void execute() {
-        // Check if we see a tag
-        if (!LimelightHelpers.getTV("limelight")) {
-            m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), slowMode);
-            return;
-        }
-
-        // Get target pose in robot space
-        double[] targetPoseRobotSpace = LimelightHelpers.getTargetPose_RobotSpace("limelight");
-        
-        if (targetPoseRobotSpace == null || targetPoseRobotSpace.length < 6) {
-            m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), slowMode);
-            return;
-        }
-
-        // Target position relative to robot (x = forward, y = left)
-        double targetX = targetPoseRobotSpace[0]; 
-        double targetY = targetPoseRobotSpace[1];
-        
-        // Calculate distance to target
-        double distanceToTarget = Math.sqrt(targetX * targetX + targetY * targetY);
-        
-        // Calculate desired position (stop TARGET_DISTANCE away)
-        double ratio = (distanceToTarget - TARGET_DISTANCE) / distanceToTarget;
-        double desiredX = targetX * ratio;
-        double desiredY = targetY * ratio;
-        
-        // Convert robot-relative desired position to field coordinates
-        Pose2d currentPose = m_SwerveSubsystem.getPose();
-        double fieldX = currentPose.getX() + 
-                       (desiredX * Math.cos(currentPose.getRotation().getRadians()) - 
-                        desiredY * Math.sin(currentPose.getRotation().getRadians()));
-        double fieldY = currentPose.getY() + 
-                       (desiredX * Math.sin(currentPose.getRotation().getRadians()) + 
-                        desiredY * Math.cos(currentPose.getRotation().getRadians()));
-        
-        // Calculate angle to face the tag
-        double angleToTarget = Math.atan2(targetY, targetX);
-        double desiredHeading = currentPose.getRotation().getRadians() + angleToTarget;
-        
-        // Create target pose in field coordinates
-        Pose2d targetPose = new Pose2d(
-            new Translation2d(fieldX, fieldY),
-            new Rotation2d(desiredHeading)
-        );
-        
-        // Use your autoAlign method
-        m_SwerveSubsystem.autoAlign(targetPose, slowMode);
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), slowMode);
-    }
-
-    @Override
-    public boolean isFinished() {
-        if (!LimelightHelpers.getTV("limelight")) {
-            return true;
-        }
-
-        double[] targetPoseRobotSpace = LimelightHelpers.getTargetPose_RobotSpace("limelight");
-        if (targetPoseRobotSpace == null || targetPoseRobotSpace.length < 6) {
-            return true;
-        }
-
-        double targetX = targetPoseRobotSpace[0];
-        double targetY = targetPoseRobotSpace[1];
-        double distanceToTarget = Math.sqrt(targetX * targetX + targetY * targetY);
-        double distanceError = Math.abs(distanceToTarget - TARGET_DISTANCE);
-        
-        double angleToTarget = Math.atan2(targetY, targetX);
-        
-        // Finish when close enough (5cm and 5 degrees)
-        return distanceError < 0.05 && Math.abs(angleToTarget) < Math.toRadians(5);
-    }
+  // Returns true when the command should end.
+  @Override
+  public boolean isFinished() {
+    return m_VisionSubsystem.isAligned();
+  }
 }
