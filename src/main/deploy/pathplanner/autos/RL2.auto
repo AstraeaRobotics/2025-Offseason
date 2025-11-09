@@ -7,19 +7,19 @@
         {
           "type": "named",
           "data": {
-            "name": "RaiseToL1"
+            "name": "RaiseToL2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "BLL12Side"
+            "pathName": "RL12Side"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreCoralL1"
+            "name": "ScoreCoral"
           }
         }
       ]
