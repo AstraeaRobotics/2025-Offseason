@@ -6,6 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -55,8 +56,12 @@ public class RobotContainer {
   private final ElevatorSubsystem m_ElevatorSubsystem = new ElevatorSubsystem();
   private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
 
-  private final PS4Controller m_Controller = new PS4Controller(0);
-  public static final GenericHID operatorGamepad = new GenericHID(1);
+  // Joystick Controllers - Port 0: Left stick (forward/back), Port 1: Right stick (strafe/rotation)
+  private final Joystick m_leftJoystick = new Joystick(0);
+  private final Joystick m_rightJoystick = new Joystick(1);
+
+  private final PS4Controller m_Controller = new PS4Controller(2);
+  public static final GenericHID operatorGamepad = new GenericHID(3);
 
   public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
   public static final JoystickButton kOperator2 = new JoystickButton(operatorGamepad, 2);
@@ -71,14 +76,14 @@ public class RobotContainer {
   public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
   public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
 
-  private final JoystickButton kCircle = new JoystickButton(m_Controller,PS4Controller.Button.kCircle.value);
+  private final JoystickButton kCircle = new JoystickButton(m_Controller, PS4Controller.Button.kCircle.value);
   private final JoystickButton kSquare = new JoystickButton(m_Controller, PS4Controller.Button.kSquare.value);
   private final JoystickButton kCross = new JoystickButton(m_Controller, PS4Controller.Button.kCross.value);
   private final JoystickButton kTriangle = new JoystickButton(m_Controller, PS4Controller.Button.kTriangle.value);
-  private final JoystickButton kR1 = new JoystickButton(m_Controller,PS4Controller.Button.kR1.value);
-  private final JoystickButton kR2 = new JoystickButton(m_Controller,PS4Controller.Button.kR2.value);
-  private final JoystickButton kL1 = new JoystickButton(m_Controller,PS4Controller.Button.kL1.value);
-  private final JoystickButton kL2 = new JoystickButton(m_Controller,PS4Controller.Button.kL2.value);
+  private final JoystickButton kR1 = new JoystickButton(m_Controller, PS4Controller.Button.kR1.value);
+  private final JoystickButton kR2 = new JoystickButton(m_Controller, PS4Controller.Button.kR2.value);
+  private final JoystickButton kL1 = new JoystickButton(m_Controller, PS4Controller.Button.kL1.value);
+  private final JoystickButton kL2 = new JoystickButton(m_Controller, PS4Controller.Button.kL2.value);
 
   private final POVButton pov0 = new POVButton(m_Controller, 0);
   private final POVButton pov90 = new POVButton(m_Controller, 90);
@@ -143,11 +148,12 @@ public class RobotContainer {
   
     SmartDashboard.putData("Auto choices", chooser);
 
+    // Left joystick Y-axis: forward/backward, Right joystick X-axis: strafe, Right joystick Z-axis: rotation
     m_SwerveSubsystem.setDefaultCommand(new TeleopSwerveNEW(
       m_SwerveSubsystem,
-      m_Controller::getLeftX,
-      m_Controller::getLeftY,
-      m_Controller::getRightX,
+      () -> -m_rightJoystick.getX(),
+      () -> -m_leftJoystick.getY(),
+      () -> -m_rightJoystick.getZ(),
       () -> isSlowModeOn  
     ));
 
@@ -165,7 +171,6 @@ public class RobotContainer {
    */
   private void configureBindings() {
 
-    // Controller bindings
     kCross.onTrue(new ResetGyro(m_SwerveSubsystem));
     kR1.whileTrue(new IntakeCoral(m_coralSubsystem, -5));
     kL1.whileTrue(new IntakeCoral(m_coralSubsystem, 5));
@@ -182,8 +187,6 @@ public class RobotContainer {
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
     pov90.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, DrivebaseConstants.kRobotCentricVel));
 
-    // Operator gamepad bindings 
-
     kOperator1.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kRest), new SetCoralState(m_coralSubsystem, CoralStates.kRest))); // R
     kOperator2.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kSource), new SetCoralState(m_coralSubsystem, CoralStates.kSource))); // SRC
     kOperator3.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL1), new SetCoralState(m_coralSubsystem, CoralStates.kL1))); // CL1
@@ -191,18 +194,9 @@ public class RobotContainer {
     kOperator5.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL3), new SetCoralState(m_coralSubsystem, CoralStates.kL3))); // Cl3
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
-
-    
-    
   }
 
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     return chooser.getSelected();
-    // return new L1Mid(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new LL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   }
 }
