@@ -7,25 +7,25 @@
         {
           "type": "named",
           "data": {
-            "name": "RaiseToL1"
+            "name": "RaiseToL2"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RL12Side"
+            "pathName": "LL12Side"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreCoralL1"
+            "name": "ScoreCoral"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RL12toCS"
+            "pathName": "LL12toCS"
           }
         },
         {
@@ -37,13 +37,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "CStoRL12"
+            "pathName": "CStoLL12"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ScoreCoralL1"
+            "name": "ScoreCoral"
           }
         }
       ]
