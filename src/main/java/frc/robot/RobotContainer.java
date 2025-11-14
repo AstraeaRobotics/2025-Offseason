@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.CoralConstants.CoralStates;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorStates;
+import frc.robot.Constants.VisionConstants.AlignmentPosition;
 import frc.robot.commands.coral.*;
 // import frc.robot.commands.auto.paths.L1Mid;
 // import frc.robot.commands.auto.paths.LL1Side;
@@ -128,11 +129,20 @@ public class RobotContainer {
       ));
 
       NamedCommands.registerCommand("AutoAlignCENTER",
-      new ParallelCommandGroup(
-        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem)
+        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.CENTER
       ));
 
-      // og paths
+      // Add these if you want left/right alignment in auto:
+      NamedCommands.registerCommand("AutoAlignLEFT",
+        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.LEFT_EDGE
+      ));
+
+      NamedCommands.registerCommand("AutoAlignRIGHT",
+        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.RIGHT_EDGE
+      ));
+
+
+// og paths
     // chooser.setDefaultOption("L1 Mid (OLD)", m_L1Mid);
     // chooser.addOption("RL1 Side (OLD)", m_RL1Side);
     // chooser.addOption("LL1 Side (OLD)", m_LL1Side);
@@ -178,16 +188,16 @@ public class RobotContainer {
 
     // Controller bindings
     kCross.onTrue(new ResetGyro(m_SwerveSubsystem));
+    
     kR1.whileTrue(new IntakeCoral(m_coralSubsystem, -5));
     kL1.whileTrue(new IntakeCoral(m_coralSubsystem, 5));
     kTriangle.whileTrue(new ExtakeL1(m_coralSubsystem));
-
-    kCircle.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem));
 
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
     }));
 
+    //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
@@ -200,8 +210,12 @@ public class RobotContainer {
     kOperator3.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL1), new SetCoralState(m_coralSubsystem, CoralStates.kL1))); // CL1
     kOperator4.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL2), new SetCoralState(m_coralSubsystem, CoralStates.kL2))); // Cl2
     kOperator5.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL3), new SetCoralState(m_coralSubsystem, CoralStates.kL3))); // Cl3
-    kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
-    kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
+    kOperator6.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
+    kOperator7.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
+
+    kOperator10.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.LEFT_EDGE));
+    kOperator11.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.CENTER));
+    kOperator12.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.RIGHT_EDGE));
   }
 
   public Command getAutonomousCommand() {

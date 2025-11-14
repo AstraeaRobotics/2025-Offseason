@@ -40,7 +40,7 @@ public class CoralSubsystem extends SubsystemBase {
   ArmFeedforward m_coralPivotFeedforward;
   
   public CoralSubsystem() {
-    coralLeftIntakeMotor = new SparkMax(1, MotorType.kBrushless); // TO DO - put actual device motor IDs
+    coralLeftIntakeMotor = new SparkMax(1, MotorType.kBrushless); 
     coralRightIntakeMotor = new SparkMax(2, MotorType.kBrushless); 
     coralPivotMotor = new SparkMax(3, MotorType.kBrushless);
 

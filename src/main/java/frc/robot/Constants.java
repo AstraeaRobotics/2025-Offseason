@@ -143,6 +143,22 @@ public final class Constants {
     public static final double kP = 0.001;
     public static final double kI = 0.00;
     public static final double kD = 0.00;
+    
+    public enum AlignmentPosition {
+      CENTER(0.0),
+      LEFT_EDGE(0.08255),
+      RIGHT_EDGE(-0.08255);
+
+      private final double offsetMeters;
+
+      AlignmentPosition(double offsetMeters) {
+        this.offsetMeters = offsetMeters;
+      }
+
+      public double getOffsetMeters() {
+        return offsetMeters;
+      }
+    }
   }
 
   public static final class ClimbConstants { 

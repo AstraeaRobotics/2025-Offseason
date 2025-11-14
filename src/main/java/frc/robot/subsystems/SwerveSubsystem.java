@@ -6,6 +6,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -22,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.utils.LimelightHelpers;
 
 public class SwerveSubsystem extends SubsystemBase {
   
@@ -155,16 +157,26 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    LimelightHelpers.SetRobotOrientation("limelight", getHeading(), 0, 0, 0, 0, 0);
+    
+    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    
+    if(mt2 != null && mt2.tagCount > 0) {
+      swerveDrivePoseEstimator.addVisionMeasurement(
+        mt2.pose,
+        mt2.timestampSeconds,
+        VecBuilder.fill(0.7, 0.7, 9999999)
+      );
+    }
+    
+    // Existing pose estimator update
     swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
     
     publisher.set(getPose());
-    
     m_field.setRobotPose(getPose());
-
+  
     SmartDashboard.putNumber("Robot X", getPose().getX());
     SmartDashboard.putNumber("Robot Y", getPose().getY());
     SmartDashboard.putNumber("Robot Heading", getPose().getRotation().getDegrees());
-
-    
   }
 }
