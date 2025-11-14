@@ -22,11 +22,11 @@ import frc.robot.Constants.CoralConstants.CoralStates;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorStates;
 import frc.robot.commands.coral.*;
-import frc.robot.commands.auto.paths.L1Mid;
-import frc.robot.commands.auto.paths.LL1Side;
-import frc.robot.commands.auto.paths.LL2Side;
-import frc.robot.commands.auto.paths.RL1Side;
-import frc.robot.commands.auto.paths.RL2Side;
+// import frc.robot.commands.auto.paths.L1Mid;
+// import frc.robot.commands.auto.paths.LL1Side;
+// import frc.robot.commands.auto.paths.LL2Side;
+// import frc.robot.commands.auto.paths.RL1Side;
+// import frc.robot.commands.auto.paths.RL2Side;
 import frc.robot.commands.elevator.IncrementSetpoint;
 import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
@@ -87,11 +87,11 @@ public class RobotContainer {
 
   SendableChooser<Command> chooser = new SendableChooser<>();
 
-  private final Command m_L1Mid = new L1Mid(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-  private final Command m_RL1Side = new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-  private final Command m_LL1Side = new LL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-  private final Command m_RL2Side = new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-  private final Command m_LL2Side = new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  // private final Command m_L1Mid = new L1Mid(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  // private final Command m_RL1Side = new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  // private final Command m_LL1Side = new LL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  // private final Command m_RL2Side = new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
+  // private final Command m_LL2Side = new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   
   private boolean isSlowModeOn = false; 
 
@@ -127,19 +127,30 @@ public class RobotContainer {
         new IntakeCoral(m_coralSubsystem, -5)
       ));
 
-    chooser.setDefaultOption("L1 Mid (OLD)", m_L1Mid);
-    chooser.addOption("RL1 Side (OLD)", m_RL1Side);
-    chooser.addOption("LL1 Side (OLD)", m_LL1Side);
-    chooser.addOption("RL2 Side (OLD)", m_RL2Side);
-    chooser.addOption("LL2Side (OLD)", m_LL2Side);
+      NamedCommands.registerCommand("AutoAlignCENTER",
+      new ParallelCommandGroup(
+        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem)
+      ));
+
+      // og paths
+    // chooser.setDefaultOption("L1 Mid (OLD)", m_L1Mid);
+    // chooser.addOption("RL1 Side (OLD)", m_RL1Side);
+    // chooser.addOption("LL1 Side (OLD)", m_LL1Side);
+    // chooser.addOption("RL2 Side (OLD)", m_RL2Side);
+    // chooser.addOption("LL2Side (OLD)", m_LL2Side);
   
+    // new pp paths
     chooser.addOption("L1Mid", AutoBuilder.buildAuto("L1Mid"));
     chooser.addOption("RL2", AutoBuilder.buildAuto("RL2"));
     chooser.addOption("RL1", AutoBuilder.buildAuto("RL1"));
     chooser.addOption("LL2", AutoBuilder.buildAuto("LL2"));
     chooser.addOption("LL1", AutoBuilder.buildAuto("LL1"));
 
+    // 2 pc pp paths 
     chooser.addOption("2Pc_RL1", AutoBuilder.buildAuto("2Pc_RL1"));
+    chooser.addOption("2Pc_RL2", AutoBuilder.buildAuto("2Pc_RL2"));
+    chooser.addOption("2Pc_LL1", AutoBuilder.buildAuto("2Pc_LL1"));
+    chooser.addOption("2Pc_LL2", AutoBuilder.buildAuto("2Pc_LL2"));
   
     SmartDashboard.putData("Auto choices", chooser);
 
@@ -191,18 +202,10 @@ public class RobotContainer {
     kOperator5.onTrue(new ParallelCommandGroup(new SetElevatorState(m_ElevatorSubsystem, ElevatorStates.kCL3), new SetCoralState(m_coralSubsystem, CoralStates.kL3))); // Cl3
     kOperator9.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator10.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
-
-    
-    
   }
 
   public Command getAutonomousCommand() {
     // An example command will be run in autonomous
     return chooser.getSelected();
-    // return new L1Mid(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new LL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new LL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new RL1Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
-    // return new RL2Side(m_SwerveSubsystem, m_coralSubsystem, m_ElevatorSubsystem);
   }
 }
