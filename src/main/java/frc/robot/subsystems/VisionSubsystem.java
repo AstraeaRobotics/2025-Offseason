@@ -12,7 +12,11 @@ import frc.robot.utils.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
   
-  private final double m_targetDistance = 0.305; // 1 ft to stop
+  private final double LIMELIGHT_TO_FRONT_OFFSET = 0.338; 
+  
+  private final double DESIRED_FRONT_DISTANCE = 0.15; 
+  
+  private final double m_targetDistance = DESIRED_FRONT_DISTANCE + LIMELIGHT_TO_FRONT_OFFSET; 
 
   private final PIDController m_xController;
   private final PIDController m_yController;
@@ -25,11 +29,14 @@ public class VisionSubsystem extends SubsystemBase {
   private double m_angleToTarget;
 
   private AlignmentPosition m_alignmentPosition;
+  
+  private int alignedFrameCount = 0;
+  private static final int REQUIRED_ALIGNED_FRAMES = 10;
 
   public VisionSubsystem() {
-    m_xController = new PIDController(2.1, 0, 0);
-    m_yController = new PIDController(2.1, 0, 0);
-    m_rotationController = new PIDController(2.0, 0, 0.1);
+    m_xController = new PIDController(0.006, 0, 0);  
+    m_yController = new PIDController(0.006, 0, 0);  
+    m_rotationController = new PIDController(0.01, 0, 0);
 
     m_rotationController.enableContinuousInput(-180, 180);
 
@@ -102,25 +109,27 @@ public class VisionSubsystem extends SubsystemBase {
     double m_desiredDistance = m_distanceToTarget - m_targetDistance;
 
     double m_ratio = m_desiredDistance / m_distanceToTarget;
+    
     double m_desiredX = m_targetX * m_ratio;
     double m_desiredY = m_targetY * m_ratio;
-
+    
     double horizontalOffset = m_alignmentPosition.getOffsetMeters();
     m_desiredX += horizontalOffset;
-
+    
     double m_xError = m_desiredX;
     double m_yError = m_desiredY;
     
-    double m_vx = -m_xController.calculate(0, m_xError); 
-    double m_vy = -m_yController.calculate(0, m_yError);  
-    double m_omega = Math.toRadians(m_rotationController.calculate(m_angleToTarget, 0)); 
+    double m_vx = m_xController.calculate(0, m_xError);  
+    double m_vy = m_yController.calculate(0, m_yError);  
+    double m_omega = m_rotationController.calculate(m_angleToTarget, 0); 
     
     SmartDashboard.putNumber("Vision: X Error (m)", m_xError);
     SmartDashboard.putNumber("Vision: Y Error (m)", m_yError);
+    SmartDashboard.putNumber("Vision: Angle Error (deg)", m_angleToTarget);
     SmartDashboard.putNumber("Vision: Desired Dist (m)", m_desiredDistance);
-    SmartDashboard.putNumber("Vision: vx", m_vx);
-    SmartDashboard.putNumber("Vision: vy", m_vy);
-    SmartDashboard.putNumber("Vision: omega", m_omega);
+    SmartDashboard.putNumber("Vision: vx (m/s)", m_vx);
+    SmartDashboard.putNumber("Vision: vy (m/s)", m_vy);
+    SmartDashboard.putNumber("Vision: omega (deg/s)", m_omega);
     SmartDashboard.putString("Vision: Alignment", m_alignmentPosition.name());
     
     return new double[]{m_vx, m_vy, m_omega};
@@ -128,22 +137,38 @@ public class VisionSubsystem extends SubsystemBase {
 
   public boolean isAligned() {
     if (!m_hasValidTarget) {
+      alignedFrameCount = 0;
       return false;
     }
 
     double m_distanceError = Math.abs(m_distanceToTarget - m_targetDistance);
-    
     double horizontalError = Math.abs(m_targetX - m_alignmentPosition.getOffsetMeters());
     
-    return m_distanceError < 0.05 && 
-           Math.abs(m_angleToTarget) < 5 && 
-           horizontalError < 0.03; 
+    boolean distanceOK = m_distanceError < 0.08; 
+    boolean angleOK = Math.abs(m_angleToTarget) < 8;  
+    boolean horizontalOK = horizontalError < 0.08;  
+    
+    SmartDashboard.putBoolean("Vision: Distance OK", distanceOK);
+    SmartDashboard.putBoolean("Vision: Angle OK", angleOK);
+    SmartDashboard.putBoolean("Vision: Horizontal OK", horizontalOK);
+    SmartDashboard.putNumber("Vision: Aligned Frame Count", alignedFrameCount);
+    
+    boolean currentlyAligned = distanceOK && angleOK && horizontalOK;
+    
+    if (currentlyAligned) {
+      alignedFrameCount++;
+    } else {
+      alignedFrameCount = 0;
+    }
+    
+    return alignedFrameCount >= REQUIRED_ALIGNED_FRAMES;
   }
 
   public void resetAlignmentControllers() {
     m_xController.reset();
     m_yController.reset();
     m_rotationController.reset();
+    alignedFrameCount = 0;
   }
 
   public void setPipeline(int m_pipelineIndex) {

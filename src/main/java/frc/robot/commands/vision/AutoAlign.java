@@ -5,6 +5,7 @@
 package frc.robot.commands.vision;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -18,9 +19,11 @@ public class AutoAlign extends Command {
   private final SwerveSubsystem m_SwerveSubsystem;
   private final VisionSubsystem m_VisionSubsystem;
   private final AlignmentPosition m_alignmentPosition;
+  
+  private double startTime = 0;
+  private static final double TIMEOUT_SECONDS = 3.0;
 
   public AutoAlign(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem, AlignmentPosition m_alignmentPosition) {
-    // Use addRequirements() here to declare subsystem dependencies.
     this.m_SwerveSubsystem = m_SwerveSubsystem;
     this.m_VisionSubsystem = m_VisionSubsystem;
     this.m_alignmentPosition = m_alignmentPosition;
@@ -28,24 +31,22 @@ public class AutoAlign extends Command {
     addRequirements(m_SwerveSubsystem, m_VisionSubsystem);
   }
 
-  // constructor overload to not specify pos.
   public AutoAlign(SwerveSubsystem swerveSubsystem, VisionSubsystem visionSubsystem) {
     this(swerveSubsystem, visionSubsystem, null);
   }
 
-  // Called when the command is initially scheduled.
   @Override
   public void initialize() {
     if (m_alignmentPosition != null) {
       m_VisionSubsystem.setAlignmentPosition(m_alignmentPosition);
     }
     
+    startTime = Timer.getFPGATimestamp();
     System.out.println("Auto-align started - Position: " + m_VisionSubsystem.getAlignmentPosition());
     m_VisionSubsystem.resetAlignmentControllers();
     SmartDashboard.putString("Auto-Align Status", "STARTING");
   }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     if (!m_VisionSubsystem.hasTarget()) {
@@ -55,16 +56,22 @@ public class AutoAlign extends Command {
     }
 
     double[] speeds = m_VisionSubsystem.calculateAlignmentSpeeds();
-    double vx = speeds[0];    
+    double vx = speeds[0]; 
     double vy = speeds[1];  
     double omega = speeds[2]; 
     
-    m_SwerveSubsystem.drive(new ChassisSpeeds(vx, vy, omega), true);
+    omega = Math.toRadians(omega);
+    
+    ChassisSpeeds chassisSpeeds = new ChassisSpeeds(vy, vx, omega);
+    
+    m_SwerveSubsystem.drive(chassisSpeeds, true);
     
     SmartDashboard.putString("Auto-Align Status", "ALIGNING");
+    SmartDashboard.putNumber("AutoAlign vx", vx);
+    SmartDashboard.putNumber("AutoAlign vy", vy);
+    SmartDashboard.putNumber("AutoAlign omega", Math.toDegrees(omega));
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), true);
@@ -73,16 +80,26 @@ public class AutoAlign extends Command {
       System.out.println("Auto-align interrupted");
       SmartDashboard.putString("Auto-Align Status", "INTERRUPTED");
     } 
-    
     else {
       System.out.println("Auto-align complete - " + m_VisionSubsystem.getAlignmentPosition());
       SmartDashboard.putString("Auto-Align Status", "ALIGNED");
     }
   }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_VisionSubsystem.isAligned();
+    double elapsedTime = Timer.getFPGATimestamp() - startTime;
+    
+    if (elapsedTime > TIMEOUT_SECONDS) {
+      System.out.println("Auto-align timed out after " + elapsedTime + " seconds");
+      SmartDashboard.putString("Auto-Align Status", "TIMEOUT");
+      return true;
+    }
+    
+    boolean aligned = m_VisionSubsystem.isAligned();
+    SmartDashboard.putBoolean("Vision: Is Aligned", aligned);
+    SmartDashboard.putNumber("AutoAlign Time Elapsed", elapsedTime);
+    
+    return aligned;
   }
 }
