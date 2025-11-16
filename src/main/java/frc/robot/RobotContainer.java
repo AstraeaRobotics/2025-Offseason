@@ -33,7 +33,7 @@ import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.commands.vision.AutoAlign;
+import frc.robot.commands.vision.HeadingAlign;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -128,20 +128,6 @@ public class RobotContainer {
         new IntakeCoral(m_coralSubsystem, -5)
       ));
 
-      NamedCommands.registerCommand("AutoAlignCENTER",
-        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.CENTER
-      ));
-
-      // Add these if you want left/right alignment in auto:
-      NamedCommands.registerCommand("AutoAlignLEFT",
-        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.LEFT_EDGE
-      ));
-
-      NamedCommands.registerCommand("AutoAlignRIGHT",
-        new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.RIGHT_EDGE
-      ));
-
-
 // og paths
     // chooser.setDefaultOption("L1 Mid (OLD)", m_L1Mid);
     // chooser.addOption("RL1 Side (OLD)", m_RL1Side);
@@ -197,6 +183,8 @@ public class RobotContainer {
       isSlowModeOn = !isSlowModeOn;
     }));
 
+    kCircle.onTrue(new HeadingAlign(m_SwerveSubsystem, m_VisionSubsystem));
+
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
@@ -213,9 +201,6 @@ public class RobotContainer {
     kOperator6.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, 1)); // IL
     kOperator7.onTrue(new IncrementSetpoint(m_ElevatorSubsystem, -1)); // DL
 
-    kOperator10.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.LEFT_EDGE));
-    kOperator11.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.CENTER));
-    kOperator12.onTrue(new AutoAlign(m_SwerveSubsystem, m_VisionSubsystem, AlignmentPosition.RIGHT_EDGE));
   }
 
   public Command getAutonomousCommand() {
