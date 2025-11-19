@@ -32,10 +32,9 @@ public class VisionSubsystem extends SubsystemBase {
     private static final int REQUIRED_ALIGNED_FRAMES = 10;
 
     public VisionSubsystem() {
-        // Use standard PID "setpoint" pattern for X/Y
         m_xController = new PIDController(0.006, 0, 0);
-        m_yController = new PIDController(0.0, 0, 0); // Placeholder until tuned
-        m_rotationController = new PIDController(0.01, 0, 0);
+        m_yController = new PIDController(0, 0, 0); 
+        m_rotationController = new PIDController(0, 0, 0);
 
         m_rotationController.enableContinuousInput(-180, 180);
 
@@ -76,17 +75,30 @@ public class VisionSubsystem extends SubsystemBase {
         return m_hasValidTarget;
     }
 
-    public double getTargetX() { return m_targetX; }
-    public double getTargetY() { return m_targetY; }
-    public double getDistanceToTarget() { return m_distanceToTarget; }
-    public double getAngleToTarget() { return m_angleToTarget; }
+    public double getTargetX() { 
+        return m_targetX; 
+    }
 
-    public void setAlignmentPosition(AlignmentPosition position) { m_alignmentPosition = position; }
-    public AlignmentPosition getAlignmentPosition() { return m_alignmentPosition; }
+    public double getTargetY() { 
+        return m_targetY; 
+    }
 
-    /**
-     * Calculates chassis speeds [vx, vy, omega] using the improved PID pattern.
-     */
+    public double getDistanceToTarget() { 
+        return m_distanceToTarget; 
+    }
+    public double getAngleToTarget() { 
+        return m_angleToTarget; 
+    }
+
+    public void setAlignmentPosition(AlignmentPosition position) { 
+        m_alignmentPosition = position; 
+    }
+    
+    public AlignmentPosition getAlignmentPosition() { 
+        return m_alignmentPosition; 
+    }
+
+
     public double[] calculateAlignmentSpeeds() {
         if (!m_hasValidTarget) {
             return new double[]{0, 0, 0};
@@ -97,9 +109,8 @@ public class VisionSubsystem extends SubsystemBase {
 
         double horizontalOffset = m_alignmentPosition.getOffsetMeters();
 
-        // Use PIDController setpoints instead of manually calculating error
         m_xController.setSetpoint(horizontalOffset); 
-        m_yController.setSetpoint(0); // targetY aligned with setpoint=0
+        m_yController.setSetpoint(0); 
 
         double vx = m_xController.calculate(m_targetX);
         double vy = m_yController.calculate(m_targetY);
@@ -156,14 +167,33 @@ public class VisionSubsystem extends SubsystemBase {
         return LimelightHelpers.getCurrentPipelineIndex("limelight");
     }
 
-    public void setLEDsOn() { LimelightHelpers.setLEDMode_ForceOn("limelight"); }
-    public void setLEDsOff() { LimelightHelpers.setLEDMode_ForceOff("limelight"); }
-    public void setLEDsPipelineControl() { LimelightHelpers.setLEDMode_PipelineControl("limelight"); }
+    public void setLEDsOn() { 
+        LimelightHelpers.setLEDMode_ForceOn("limelight"); 
+    }
 
-    public double getTX() { return LimelightHelpers.getTX("limelight"); }
-    public double getTY() { return LimelightHelpers.getTY("limelight"); }
-    public double getTA() { return LimelightHelpers.getTA("limelight"); }
-    public double getFiducialID() { return LimelightHelpers.getFiducialID("limelight"); }
+    public void setLEDsOff() { 
+        LimelightHelpers.setLEDMode_ForceOff("limelight"); 
+    }
+
+    public void setLEDsPipelineControl() { 
+        LimelightHelpers.setLEDMode_PipelineControl("limelight"); 
+    }
+
+    public double getTX() { 
+        return LimelightHelpers.getTX("limelight"); 
+    }
+
+    public double getTY() { 
+        return LimelightHelpers.getTY("limelight"); 
+    }
+
+    public double getTA() { 
+        return LimelightHelpers.getTA("limelight"); 
+    }
+
+    public double getFiducialID() { 
+        return LimelightHelpers.getFiducialID("limelight"); 
+    }
 
     @Override
     public void periodic() {
