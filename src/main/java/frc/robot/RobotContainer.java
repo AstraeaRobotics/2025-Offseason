@@ -33,7 +33,6 @@ import frc.robot.commands.elevator.SetElevatorState;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.commands.vision.HeadingAlign;
 import frc.robot.subsystems.CoralSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -182,8 +181,6 @@ public class RobotContainer {
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
     }));
-
-    kCircle.onTrue(new HeadingAlign(m_SwerveSubsystem, m_VisionSubsystem));
 
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));

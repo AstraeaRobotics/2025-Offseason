@@ -146,8 +146,8 @@ public final class Constants {
     
     public enum AlignmentPosition {
       CENTER(0.0),
-      LEFT_EDGE(0.08255),
-      RIGHT_EDGE(-0.08255);
+      LEFT_EDGE(-0.127), // 5in
+      RIGHT_EDGE(0.127);
 
       private final double offsetMeters;
 

@@ -14,9 +14,22 @@ public class VisionSubsystem extends SubsystemBase {
   
   private final double LIMELIGHT_TO_FRONT_OFFSET = 0.338; 
   
-  private final double DESIRED_FRONT_DISTANCE = 0.15; 
+  private final double DESIRED_FRONT_DISTANCE = 0.0254; // 1in 
   
   private final double m_targetDistance = DESIRED_FRONT_DISTANCE + LIMELIGHT_TO_FRONT_OFFSET; 
+
+  final double X_KP = 0.006;
+  final double X_KI = 0;
+  final double X_KD = 0;
+  
+  final double Y_KP = 0.008; // may need to tune
+  final double Y_KI = 0;
+  final double Y_KD = 0;
+  
+  // may need to tune
+  final double ROT_KP = 2.0;
+  final double ROT_KI = 0;
+  final double ROT_KD = 0.1;
 
   private final PIDController m_xController;
   private final PIDController m_yController;
@@ -34,9 +47,9 @@ public class VisionSubsystem extends SubsystemBase {
   private static final int REQUIRED_ALIGNED_FRAMES = 10;
 
   public VisionSubsystem() {
-    m_xController = new PIDController(0.006, 0, 0);  
-    m_yController = new PIDController(0.006, 0, 0);  
-    m_rotationController = new PIDController(0.01, 0, 0);
+    m_xController = new PIDController(X_KP, X_KI, X_KD);  
+    m_yController = new PIDController(Y_KP, Y_KI, Y_KD);  
+    m_rotationController = new PIDController(ROT_KP, ROT_KI, ROT_KD);
 
     m_rotationController.enableContinuousInput(-180, 180);
 
@@ -46,6 +59,26 @@ public class VisionSubsystem extends SubsystemBase {
     m_distanceToTarget = 0;
     m_angleToTarget = 0;
     m_alignmentPosition = AlignmentPosition.CENTER; 
+
+    SmartDashboard.putNumber("Vision X_KP", X_KP);
+    SmartDashboard.putNumber("Vision X_KD", X_KD);
+    SmartDashboard.putNumber("Vision Y_KP", Y_KP);
+    SmartDashboard.putNumber("Vision Y_KP", Y_KD);
+    SmartDashboard.putNumber("Vision ROT_KP", ROT_KP);
+    SmartDashboard.putNumber("Vision ROT_KP", ROT_KD);
+  }
+
+  public void updatePIDLive() {
+    double xKp = SmartDashboard.getNumber("Vision X_KP", X_KP);
+    double xKd = SmartDashboard.getNumber("Vision X_KD", X_KD);
+    double yKp = SmartDashboard.getNumber("Vision Y_KP", Y_KP);
+    double yKd = SmartDashboard.getNumber("Vision Y_KP", Y_KD);
+    double rotKp = SmartDashboard.getNumber("Vision ROT_KP", ROT_KP);
+    double rotKd = SmartDashboard.getNumber("Vision ROT_KP", ROT_KD);
+
+    m_xController.setPID(xKp,0, xKd);
+    m_yController.setPID(yKp,0, yKd);
+    m_rotationController.setPID(rotKp,0, rotKd);
   }
 
   private void updateTargetData() {
@@ -157,7 +190,9 @@ public class VisionSubsystem extends SubsystemBase {
     
     if (currentlyAligned) {
       alignedFrameCount++;
-    } else {
+    } 
+    
+    else {
       alignedFrameCount = 0;
     }
     
@@ -216,5 +251,7 @@ public class VisionSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Vision: Target Y (m)", m_targetY);
     SmartDashboard.putNumber("Vision: Distance (m)", m_distanceToTarget);
     SmartDashboard.putNumber("Vision: Angle (deg)", m_angleToTarget);
+
+    updatePIDLive();
   }
 }
