@@ -48,9 +48,6 @@ public class SwerveSubsystem extends SubsystemBase {
   public double rotationalKP = 2.0; 
   public double rotationalKD = 0.1; 
 
-  // PID Controllers for auto-align (moved to VisionSubsystem)
-  // Removed - vision logic now in VisionSubsystem
-
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS();
@@ -157,19 +154,18 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    LimelightHelpers.SetRobotOrientation("limelight", getHeading(), 0, 0, 0, 0, 0);
+    // LimelightHelpers.SetRobotOrientation("limelight", getHeading(), 0, 0, 0, 0, 0);
     
-    LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
+    // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
     
-    if(mt2 != null && mt2.tagCount > 0) {
-      swerveDrivePoseEstimator.addVisionMeasurement(
-        mt2.pose,
-        mt2.timestampSeconds,
-        VecBuilder.fill(0.7, 0.7, 9999999)
-      );
-    }
+    // if(mt2 != null && mt2.tagCount > 0) {
+    //   swerveDrivePoseEstimator.addVisionMeasurement(
+    //     mt2.pose,
+    //     mt2.timestampSeconds,
+    //     VecBuilder.fill(0.7, 0.7, 9999999)
+    //   );
+    // }
     
-    // Existing pose estimator update
     swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
     
     publisher.set(getPose());
