@@ -4,6 +4,7 @@
 
 package frc.robot.commands.vision;
 
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -13,44 +14,41 @@ import frc.robot.utils.SwerveUtil;
 public class AlignX extends Command {
   /** Creates a new AlignX. */
 
-  private final SwerveSubsystem swerve;
-  private final VisionSubsystem vision;
+  VisionSubsystem m_VisionSubsystem;
+  SwerveSubsystem m_SwerveSubsystem;
+  private final boolean m_slowMode;
 
-  public AlignX(SwerveSubsystem swerve, VisionSubsystem vision) {
+  public AlignX(VisionSubsystem m_VisionSubsystem, SwerveSubsystem m_SwerveSubsystem, boolean m_slowMode) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.swerve = swerve;
-    this.vision = vision;
+    this.m_SwerveSubsystem = m_SwerveSubsystem;
+    this.m_VisionSubsystem = m_VisionSubsystem;
+    this.m_slowMode = m_slowMode;
 
-    addRequirements(swerve, vision);
+    addRequirements(m_SwerveSubsystem, m_VisionSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    vision.resetAlignmentControllers();
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double[] speeds = vision.calculateAlignmentSpeeds();
-    double vx = speeds[0];
-    swerve.drive(
-      SwerveUtil.driveInputToChassisSpeeds(vx, 0, 0,0),
-      true
-    );
+    double vx = m_VisionSubsystem.calculateXSpeed();
+    ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(vx, 0, 0, m_SwerveSubsystem.getHeading());
+
+    m_SwerveSubsystem.drive(speeds, m_slowMode);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    swerve.drive(SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, 0),
-      false);
+    m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), m_slowMode);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return vision.isAligned();
+    return m_VisionSubsystem.isAlignedX();
   }
 }

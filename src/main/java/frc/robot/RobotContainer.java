@@ -16,6 +16,7 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.vision.AlignX;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
@@ -93,6 +94,8 @@ public class RobotContainer {
     kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
     }));
+
+    kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
 
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));

@@ -24,9 +24,8 @@ public class Robot extends TimedRobot {
    * initialization code.
    */
   public Robot() {
-    CameraServer.startAutomaticCapture();
     m_robotContainer = new RobotContainer();
-}
+  }
 
   @Override
   public void robotPeriodic() {
