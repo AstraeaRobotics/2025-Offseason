@@ -17,16 +17,15 @@ import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
 import frc.robot.commands.vision.AlignX;
+import frc.robot.commands.vision.AlignY;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
+import frc.robot.utils.LimelightHelpers;
 
-/**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
- * subsystems, commands, and trigger mappings) should be declared here.
- */
 public class RobotContainer {
+  // LIMELIGHT NAME - Match this with VisionSubsystem
+  private static final String LIMELIGHT_NAME = "limelight";
+  
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem m_SwerveSubsystem = new SwerveSubsystem();
   private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
@@ -63,9 +62,7 @@ public class RobotContainer {
   
   private boolean isSlowModeOn = false; 
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
-
     m_SwerveSubsystem.setDefaultCommand(new TeleopSwerveNEW(
       m_SwerveSubsystem,
       m_Controller::getLeftX,
@@ -77,17 +74,7 @@ public class RobotContainer {
     configureBindings();
   }
 
-  /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
-   * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
-   * joysticks}.
-   */
   private void configureBindings() {
-
     // Controller bindings
     kCross.onTrue(new ResetGyro(m_SwerveSubsystem));
 
@@ -95,7 +82,14 @@ public class RobotContainer {
       isSlowModeOn = !isSlowModeOn;
     }));
 
-    kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kCircle.onTrue(new InstantCommand(() -> {
+      System.out.println("=== ALIGN X BUTTON PRESSED ===");
+      System.out.println("Vision has target: " + m_VisionSubsystem.hasValidTarget());
+      System.out.println("Target X: " + LimelightHelpers.getTX(LIMELIGHT_NAME));
+      System.out.println("Limelight TV: " + LimelightHelpers.getTV(LIMELIGHT_NAME));
+    }).andThen(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true)));
+
+    kTriangle.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
 
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
@@ -105,7 +99,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    // An example command will be run in autonomous
     return null;
   }
 }

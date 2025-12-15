@@ -5,95 +5,111 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.VisionConstants.AlignmentPosition;
 import frc.robot.utils.LimelightHelpers;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class VisionSubsystem extends SubsystemBase {
 
-    private final double LIMELIGHT_TO_FRONT_OFFSET = 0.338;
-    private final double DESIRED_FRONT_DISTANCE = 0.15;
-    private final double m_targetDistance = DESIRED_FRONT_DISTANCE + LIMELIGHT_TO_FRONT_OFFSET;
+    private static final String LIMELIGHT_NAME = "limelight";
 
     private final PIDController m_xController;
     private final PIDController m_yController;
-    private final PIDController m_rotationController;
 
     private boolean m_hasValidTarget;
-    private double m_targetX;
-    private double m_targetY;
-    private double m_distanceToTarget;
-    private double m_angleToTarget;
+    private double m_tx; // Horizontal offset in degrees
+    private double m_ty; // Vertical offset in degrees
 
     private AlignmentPosition m_alignmentPosition = AlignmentPosition.CENTER;
-    private int alignedFrameCount = 0;
-    private static final int REQUIRED_ALIGNED_FRAMES = 10;
 
-    private boolean limelightAvailable = false;
+    private NetworkTable limelightTable;
 
     public VisionSubsystem() {
-        m_xController = new PIDController(0.006, 0, 0);
-        m_yController = new PIDController(0, 0, 0);
-        m_rotationController = new PIDController(0, 0, 0);
-        m_rotationController.enableContinuousInput(-180, 180);
-
-        limelightAvailable = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tv").exists();
+        m_xController = new PIDController(0.0098, 0, 0.0);
+        
+        m_yController = new PIDController(0.012, 0, 0.0);
+        
+        limelightTable = NetworkTableInstance.getDefault().getTable(LIMELIGHT_NAME);
+        
+        System.out.println("===========================================");
+        System.out.println("Vision Subsystem Initialized");
+        System.out.println("Limelight Name: " + LIMELIGHT_NAME);
+        System.out.println("===========================================");
     }
 
     private void updateTargetData() {
-        if (!limelightAvailable) {
-            m_hasValidTarget = false;
-            m_targetX = 0;
-            m_targetY = 0;
-            m_distanceToTarget = 0;
-            m_angleToTarget = 0;
-            return;
-        }
-
-        m_hasValidTarget = LimelightHelpers.getTV("limelight");
+        // Get TV (target valid) directly from NetworkTables
+        double tvValue = limelightTable.getEntry("tv").getDouble(0.0);
+        m_hasValidTarget = (tvValue == 1.0);
 
         if (!m_hasValidTarget) {
-            m_targetX = 0;
-            m_targetY = 0;
-            m_distanceToTarget = 0;
-            m_angleToTarget = 0;
+            m_tx = 0;
+            m_ty = 0;
             return;
         }
 
-        double[] pose = LimelightHelpers.getTargetPose_RobotSpace("limelight");
-
-        if (pose == null || pose.length < 6) {
-            m_hasValidTarget = false;
-            return;
-        }
-
-        m_targetX = pose[0];
-        m_targetY = pose[1];
-        m_distanceToTarget = Math.sqrt(m_targetX * m_targetX + m_targetY * m_targetY);
-        m_angleToTarget = Math.toDegrees(Math.atan2(m_targetX, m_targetY));
+        // Get TX and TY in degrees
+        m_tx = limelightTable.getEntry("tx").getDouble(0.0);
+        m_ty = limelightTable.getEntry("ty").getDouble(0.0);
     }
 
     public double calculateXSpeed() {
-        if (!m_hasValidTarget) return 0;
+        if (!m_hasValidTarget) {
+            System.out.println("No valid target for X alignment");
+            return 0;
+        }
 
-        double horizontalOffset = m_alignmentPosition.getOffsetMeters();
-        m_xController.setSetpoint(horizontalOffset);
+        // Target offset based on alignment position
+        double targetOffset = 0.0; // Center alignment
+        
+        // Calculate speed based on horizontal offset
+        double speed = -m_xController.calculate(m_tx, targetOffset);
+        
+        System.out.println("TX: " + m_tx + ", X Speed: " + speed);
+        return speed;
+    }
 
-        return m_xController.calculate(m_targetX);
+    public double calculateYSpeed() {
+        if (!m_hasValidTarget) {
+            System.out.println("No valid target for Y alignment");
+            return 0;
+        }
+
+        double targetTY = 15.35; 
+
+        double speed = -m_yController.calculate(m_ty, targetTY);
+        
+        System.out.println("TY: " + m_ty + ", Y Speed: " + speed);
+        return speed;
     }
 
     public boolean isAlignedX() {
         if (!m_hasValidTarget) return false;
 
-        double horizontalError = Math.abs(m_targetX - m_alignmentPosition.getOffsetMeters());
-        return horizontalError < 0.08;
+        // Consider aligned if within 1 degree
+        return Math.abs(m_tx) < 1;
+    }
+
+    public boolean isAlignedY() {
+        if (!m_hasValidTarget) return false;
+
+        // Consider aligned if within 1 degree (adjust tolerance as needed)
+        return Math.abs(m_ty) < 1;
+    }
+    
+    public boolean hasValidTarget() {
+        return m_hasValidTarget;
     }
 
     @Override
     public void periodic() {
         updateTargetData();
 
-        SmartDashboard.putBoolean("Vision: Limelight Connected", limelightAvailable);
         SmartDashboard.putBoolean("Vision: Has Target", m_hasValidTarget);
-        SmartDashboard.putNumber("Vision: X", m_targetX);
-        SmartDashboard.putNumber("Vision: Y", m_targetY);
+        SmartDashboard.putNumber("Vision: TX", m_tx);
+        SmartDashboard.putNumber("Vision: TY", m_ty);
+        SmartDashboard.putNumber("Vision: X Speed", calculateXSpeed());
+        SmartDashboard.putNumber("Vision: Y Speed", calculateYSpeed());
+        SmartDashboard.putBoolean("Vision: Is Aligned X", isAlignedX());
+        SmartDashboard.putBoolean("Vision: Is Aligned Y", isAlignedY());
     }
 }

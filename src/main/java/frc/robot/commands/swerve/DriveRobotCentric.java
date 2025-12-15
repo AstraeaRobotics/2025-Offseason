@@ -15,6 +15,9 @@ public class DriveRobotCentric extends Command {
   double ySpeed;
   double xSpeed;
 
+  // Speed multiplier for slower indoor testing - adjust this value as needed
+  private static final double SPEED_MULTIPLIER = 0.75;  // 15% of normal speed
+
   public DriveRobotCentric(SwerveSubsystem m_SwerveSubsystem, double ySpeed, double xSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.m_SwerveSubsystem = m_SwerveSubsystem;
@@ -31,7 +34,13 @@ public class DriveRobotCentric extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(xSpeed, ySpeed, 0, 0), false);
+    m_SwerveSubsystem.drive(
+      SwerveUtil.driveInputToChassisSpeeds(
+        xSpeed * SPEED_MULTIPLIER, 
+        ySpeed * SPEED_MULTIPLIER, 
+        0, 
+        0), 
+      false);
   }
 
   // Called once the command ends or is interrupted.
