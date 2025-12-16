@@ -135,19 +135,26 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-    public static final double kLeftOffset = 13;
-    public static final double kRightOffset = -15;
+    // PID Constants for X (horizontal) alignment
+    public static final double kXP = 0.0098;
+    public static final double kXI = 0.0;
+    public static final double kXD = 0.0;
+    
+    // PID Constants for Y (vertical/distance) alignment
+    public static final double kYP = 0.01;
+    public static final double kYI = 0.0;
+    public static final double kYD = 0.0;
+    
+    // Alignment tolerance (degrees)
+    public static final double kOffsetTolerance = .01;
 
-    public static final double kOffsetTolerance = 0.1;
-
-    public static final double kP = 0.001;
-    public static final double kI = 0.00;
-    public static final double kD = 0.00;
+    // Target TY value for Y alignment (adjust based on desired distance)
+    public static final double kTargetTY = 6;
     
     public enum AlignmentPosition {
       CENTER(0.0),
-      LEFT_EDGE(-0.127), // 5in
-      RIGHT_EDGE(0.127);
+      LEFT_EDGE(-0.127), // 5 inches
+      RIGHT_EDGE(0.127);  // 5 inches
 
       private final double offsetMeters;
 
