@@ -13,15 +13,16 @@ public class VisionSubsystem extends SubsystemBase {
 
     private final PIDController m_xController;
     private final PIDController m_yController;
+    private final PIDController m_rotationController;
 
     private boolean m_hasValidTarget;
     private double m_tx;
     private double m_ty;
+    private double m_targetAngle; // The angle we need to face to be perpendicular to tag
 
     private AlignmentPosition m_alignmentPosition = AlignmentPosition.CENTER;
 
     public VisionSubsystem() {
-        // Initialize PID controllers with separate values from Constants
         m_xController = new PIDController(
             VisionConstants.kXP, 
             VisionConstants.kXI, 
@@ -33,6 +34,15 @@ public class VisionSubsystem extends SubsystemBase {
             VisionConstants.kYI, 
             VisionConstants.kYD
         );
+
+        m_rotationController = new PIDController(
+            VisionConstants.kRotP,
+            VisionConstants.kRotI,
+            VisionConstants.kRotD
+        );
+        
+        m_rotationController.enableContinuousInput(0, 360);
+        m_targetAngle = 0;
     }
 
     private void updateTargetData() {
@@ -47,6 +57,23 @@ public class VisionSubsystem extends SubsystemBase {
         }
     }
 
+    /**
+     * Call this when starting rotation alignment to lock in the target angle.
+     * This calculates what heading we need to face the tag straight on.
+     */
+    public void lockTargetAngle(double currentRobotHeading) {
+        if (!m_hasValidTarget) {
+            m_targetAngle = currentRobotHeading;
+            return;
+        }
+        
+        // The target angle is our current heading adjusted by tx
+        // If tx is positive (tag is to the right), we need to rotate right
+        m_targetAngle = (currentRobotHeading + m_tx + 360) % 360;
+        
+        SmartDashboard.putNumber("Vision/TargetAngle", m_targetAngle);
+    }
+
     public double calculateXSpeed() {
         if (!m_hasValidTarget) {
             return 0;
@@ -55,8 +82,7 @@ public class VisionSubsystem extends SubsystemBase {
         double targetOffset = m_alignmentPosition.getOffsetMeters();
         double error = m_tx - targetOffset;
         
-        // Add deadband to prevent oscillation
-        if (Math.abs(error) < VisionConstants.kOffsetTolerance) {
+        if (Math.abs(error) < VisionConstants.kXTolerance) {
             return 0;
         }
         
@@ -70,22 +96,55 @@ public class VisionSubsystem extends SubsystemBase {
 
         double error = m_ty - VisionConstants.kTargetTY;
         
-        // Add deadband to prevent oscillation
-        if (Math.abs(error) < VisionConstants.kOffsetTolerance) {
+        if (Math.abs(error) < VisionConstants.kYTolerance) {
             return 0;
         }
 
         return -m_yController.calculate(m_ty, VisionConstants.kTargetTY);
     }
 
+    /**
+     * Calculates rotation speed based on the locked target angle and current robot heading.
+     * This allows the robot to spin in place without losing sight of the tag.
+     */
+    public double calculateRotationSpeed(double currentRobotHeading) {
+        if (!m_hasValidTarget) {
+            return 0;
+        }
+
+        double error = m_targetAngle - currentRobotHeading;
+        
+        // Normalize error to [-180, 180]
+        while (error > 180) error -= 360;
+        while (error < -180) error += 360;
+        
+        SmartDashboard.putNumber("Vision/RotError", error);
+        
+        if (Math.abs(error) < VisionConstants.kRotationTolerance) {
+            return 0;
+        }
+
+        return m_rotationController.calculate(currentRobotHeading, m_targetAngle);
+    }
+
     public boolean isAlignedX() {
         if (!m_hasValidTarget) return false;
-        return Math.abs(m_tx - m_alignmentPosition.getOffsetMeters()) < VisionConstants.kOffsetTolerance;
+        return Math.abs(m_tx - m_alignmentPosition.getOffsetMeters()) < VisionConstants.kXTolerance;
     }
 
     public boolean isAlignedY() {
         if (!m_hasValidTarget) return false;
-        return Math.abs(m_ty - VisionConstants.kTargetTY) < VisionConstants.kOffsetTolerance;
+        return Math.abs(m_ty - VisionConstants.kTargetTY) < VisionConstants.kYTolerance;
+    }
+
+    public boolean isAlignedRotation(double currentRobotHeading) {
+        if (!m_hasValidTarget) return false;
+        
+        double error = m_targetAngle - currentRobotHeading;
+        while (error > 180) error -= 360;
+        while (error < -180) error += 360;
+        
+        return Math.abs(error) < VisionConstants.kRotationTolerance;
     }
     
     public boolean hasValidTarget() {
@@ -100,15 +159,15 @@ public class VisionSubsystem extends SubsystemBase {
     public void periodic() {
         updateTargetData();
 
-        // Clean SmartDashboard output - no nested folders
-        SmartDashboard.putBoolean("Vision_HasTarget", m_hasValidTarget);
-        SmartDashboard.putNumber("Vision_TX_Current", m_tx);
-        SmartDashboard.putNumber("Vision_TY_Current", m_ty);
-        SmartDashboard.putNumber("Vision_TX_Target", m_alignmentPosition.getOffsetMeters());
-        SmartDashboard.putNumber("Vision_TY_Target", VisionConstants.kTargetTY);
-        SmartDashboard.putBoolean("Vision_AlignedX", isAlignedX());
-        SmartDashboard.putBoolean("Vision_AlignedY", isAlignedY());
-        SmartDashboard.putNumber("Vision_XSpeed", calculateXSpeed());
-        SmartDashboard.putNumber("Vision_YSpeed", calculateYSpeed());
+        // Organized SmartDashboard output
+        SmartDashboard.putBoolean("Vision/HasTarget", m_hasValidTarget);
+        
+        // Current values
+        SmartDashboard.putNumber("Vision/TX", m_tx);
+        SmartDashboard.putNumber("Vision/TY", m_ty);
+        
+        // Alignment status
+        SmartDashboard.putBoolean("Vision/Aligned_X", isAlignedX());
+        SmartDashboard.putBoolean("Vision/Aligned_Y", isAlignedY());
     }
 }

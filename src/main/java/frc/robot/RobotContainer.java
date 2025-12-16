@@ -8,15 +8,16 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.vision.AlignRotationGyro;
+import frc.robot.commands.vision.AlignThenRotate;
 import frc.robot.commands.vision.AlignX;
+import frc.robot.commands.vision.AlignXY;
 import frc.robot.commands.vision.AlignY;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -90,6 +91,10 @@ public class RobotContainer {
     }).andThen(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true)));
 
     kTriangle.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
+
+    kR1.onTrue(new AlignXY(m_VisionSubsystem, m_SwerveSubsystem, true));
+
+    kL1.onTrue(new AlignRotationGyro(m_VisionSubsystem, m_SwerveSubsystem, true));
 
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
