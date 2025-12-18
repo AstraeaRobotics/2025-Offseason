@@ -141,21 +141,21 @@ public final class Constants {
     public static final double kXD = 0.0;
     
     // PID Constants for Y (vertical/distance) alignment
-    public static final double kYP = 0.05; // INCREASED from 0.01 to make it faster
+    public static final double kYP = 0.05;
     public static final double kYI = 0.0;
     public static final double kYD = 0.0;
     
     // PID Constants for Rotation alignment
-    public static final double kRotP = 0.03; // Increased from 0.015 for more aggressive rotation
+    public static final double kRotP = 0.01; // Increased to actually move
     public static final double kRotI = 0.0;
-    public static final double kRotD = 0.001; // Small D term to reduce oscillation
+    public static final double kRotD = 0.0;
     
     // Alignment tolerances (separate for each axis)
-    public static final double kXTolerance = 0.5; // degrees - adjust if needed
-    public static final double kYTolerance = 0.1; // degrees - SMALLER = more precise
-    public static final double kRotationTolerance = 1.0; // REDUCED from 2.0 - was finishing too early!
+    public static final double kXTolerance = 0.5; // degrees
+    public static final double kYTolerance = 0.1; // degrees
+    public static final double kRotationTolerance = 3.0; // degrees - loosened for initial testing
     
-    // Target TY value for Y alignment (adjust based on desired distance)
+    // Target TY value for Y alignment
     public static final double kTargetTY = 5.5;
     
     public enum AlignmentPosition {

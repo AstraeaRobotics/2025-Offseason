@@ -5,23 +5,24 @@
 package frc.robot.commands.vision;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 import frc.robot.utils.SwerveUtil;
 
 /**
- * Rotates the robot to face the AprilTag squarely.
- * Uses the robot's gyro and locks in the target angle at the start,
- * so the robot spins in place without losing sight of the tag.
+ * Full alignment - X, Y, and Rotation all at once.
+ * The robot will simultaneously:
+ * - Strafe to center the tag horizontally (X)
+ * - Drive forward/backward to reach target distance (Y) 
+ * - Rotate to be parallel with the tag (Rotation)
  */
-public class AlignRotationGyro extends Command {
+public class AlignFull extends Command {
   private final VisionSubsystem m_VisionSubsystem;
   private final SwerveSubsystem m_SwerveSubsystem;
   private final boolean m_slowMode;
 
-  public AlignRotationGyro(VisionSubsystem visionSubsystem, SwerveSubsystem swerveSubsystem, boolean slowMode) {
+  public AlignFull(VisionSubsystem visionSubsystem, SwerveSubsystem swerveSubsystem, boolean slowMode) {
     this.m_VisionSubsystem = visionSubsystem;
     this.m_SwerveSubsystem = swerveSubsystem;
     this.m_slowMode = slowMode;
@@ -30,33 +31,31 @@ public class AlignRotationGyro extends Command {
   }
 
   @Override
-  public void initialize() {
-    // Lock in the target angle based on current position and tx
-    m_VisionSubsystem.lockTargetAngle(m_SwerveSubsystem.getHeading());
-    SmartDashboard.putString("Vision/Status", "Rotating...");
-  }
+  public void initialize() {}
 
   @Override
   public void execute() {
-    // Get rotation speed based on gyro heading vs target angle
+    // Calculate all three components
+    double vx = m_VisionSubsystem.calculateXSpeed();
+    double vy = m_VisionSubsystem.calculateYSpeed();
     double rotationSpeed = m_VisionSubsystem.calculateRotationSpeed(m_SwerveSubsystem.getHeading());
     
-    // Create chassis speeds with only rotation
-    ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(0, 0, rotationSpeed, m_SwerveSubsystem.getHeading());
+    // Combine all three movements
+    ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(vx, vy, rotationSpeed, m_SwerveSubsystem.getHeading());
 
     m_SwerveSubsystem.drive(speeds, m_slowMode);
-    
-    SmartDashboard.putNumber("Vision/CurrentHeading", m_SwerveSubsystem.getHeading());
   }
 
   @Override
   public void end(boolean interrupted) {
     m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), m_slowMode);
-    SmartDashboard.putString("Vision/Status", interrupted ? "Interrupted" : "Complete");
   }
 
   @Override
   public boolean isFinished() {
-    return m_VisionSubsystem.isAlignedRotation(m_SwerveSubsystem.getHeading());
+    // Finishes when ALL three axes are aligned
+    return m_VisionSubsystem.isAlignedX() 
+        && m_VisionSubsystem.isAlignedY() 
+        && m_VisionSubsystem.isAlignedRotation(m_SwerveSubsystem.getHeading());
   }
 }

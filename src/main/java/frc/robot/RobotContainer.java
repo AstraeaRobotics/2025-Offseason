@@ -14,8 +14,8 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.commands.vision.AlignRotationGyro;
-import frc.robot.commands.vision.AlignThenRotate;
+import frc.robot.commands.vision.AlignXRotation;
+import frc.robot.commands.vision.AlignFull;
 import frc.robot.commands.vision.AlignX;
 import frc.robot.commands.vision.AlignXY;
 import frc.robot.commands.vision.AlignY;
@@ -94,7 +94,9 @@ public class RobotContainer {
 
     kR1.onTrue(new AlignXY(m_VisionSubsystem, m_SwerveSubsystem, true));
 
-    kL1.onTrue(new AlignRotationGyro(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kL1.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
+
+    kR2.onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, true));
 
     //robot centric
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
