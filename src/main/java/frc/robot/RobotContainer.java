@@ -1,15 +1,13 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
@@ -21,7 +19,6 @@ import frc.robot.commands.vision.AlignXY;
 import frc.robot.commands.vision.AlignY;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.utils.LimelightHelpers;
 
 public class RobotContainer {
   // LIMELIGHT NAME - Match this with VisionSubsystem
@@ -31,7 +28,7 @@ public class RobotContainer {
   private final SwerveSubsystem m_SwerveSubsystem = new SwerveSubsystem();
   private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
 
-  private final PS4Controller m_Controller = new PS4Controller(0);
+  private final XboxController m_Controller = new XboxController(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
 
   public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
@@ -47,14 +44,13 @@ public class RobotContainer {
   public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
   public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
 
-  private final JoystickButton kCircle = new JoystickButton(m_Controller,PS4Controller.Button.kCircle.value);
-  private final JoystickButton kSquare = new JoystickButton(m_Controller, PS4Controller.Button.kSquare.value);
-  private final JoystickButton kCross = new JoystickButton(m_Controller, PS4Controller.Button.kCross.value);
-  private final JoystickButton kTriangle = new JoystickButton(m_Controller, PS4Controller.Button.kTriangle.value);
-  private final JoystickButton kR1 = new JoystickButton(m_Controller,PS4Controller.Button.kR1.value);
-  private final JoystickButton kR2 = new JoystickButton(m_Controller,PS4Controller.Button.kR2.value);
-  private final JoystickButton kL1 = new JoystickButton(m_Controller,PS4Controller.Button.kL1.value);
-  private final JoystickButton kL2 = new JoystickButton(m_Controller,PS4Controller.Button.kL2.value);
+  // Xbox button mappings (similar layout to PS4)
+  private final JoystickButton kB = new JoystickButton(m_Controller, XboxController.Button.kB.value);
+  private final JoystickButton kX = new JoystickButton(m_Controller, XboxController.Button.kX.value);
+  private final JoystickButton kA = new JoystickButton(m_Controller, XboxController.Button.kA.value);
+  private final JoystickButton kY = new JoystickButton(m_Controller, XboxController.Button.kY.value);
+  private final JoystickButton kRightBumper = new JoystickButton(m_Controller, XboxController.Button.kRightBumper.value);
+  private final JoystickButton kLeftBumper = new JoystickButton(m_Controller, XboxController.Button.kLeftBumper.value);
 
   private final POVButton pov0 = new POVButton(m_Controller, 0);
   private final POVButton pov90 = new POVButton(m_Controller, 90);
@@ -77,28 +73,25 @@ public class RobotContainer {
 
   private void configureBindings() {
     // Controller bindings
-    kCross.onTrue(new ResetGyro(m_SwerveSubsystem));
+    // A button (was Cross) - Reset Gyro
+    kA.onTrue(new ResetGyro(m_SwerveSubsystem));
 
-    kSquare.onTrue(new InstantCommand(() -> {
+    // X button (was Square) - Toggle Slow Mode
+    kX.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
+      SmartDashboard.putBoolean("SlowMode", isSlowModeOn);
     }));
 
-    kCircle.onTrue(new InstantCommand(() -> {
-      System.out.println("=== ALIGN X BUTTON PRESSED ===");
-      System.out.println("Vision has target: " + m_VisionSubsystem.hasValidTarget());
-      System.out.println("Target X: " + LimelightHelpers.getTX(LIMELIGHT_NAME));
-      System.out.println("Limelight TV: " + LimelightHelpers.getTV(LIMELIGHT_NAME));
-    }).andThen(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true)));
+    // Vision alignment commands
+    kB.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kY.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kRightBumper.onTrue(new AlignXY(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kLeftBumper.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
+    
+    new Trigger(() -> m_Controller.getRightTriggerAxis() > 0.5)
+      .onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, isSlowModeOn));
 
-    kTriangle.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
-
-    kR1.onTrue(new AlignXY(m_VisionSubsystem, m_SwerveSubsystem, true));
-
-    kL1.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
-
-    kR2.onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, true));
-
-    //robot centric
+    // Robot centric drive
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));

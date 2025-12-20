@@ -1,10 +1,7 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.commands.vision;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -32,7 +29,8 @@ public class AlignXRotation extends Command {
 
   @Override
   public void initialize() {
-    System.out.println("=== STARTING X + ROTATION ALIGN ===");
+    // Only log to SmartDashboard, not console
+    SmartDashboard.putString("Vision/Command", "X+Rotation Align Started");
   }
 
   @Override
@@ -40,6 +38,10 @@ public class AlignXRotation extends Command {
     // Calculate both X strafe and rotation simultaneously
     double vx = m_VisionSubsystem.calculateXSpeed();
     double rotationSpeed = m_VisionSubsystem.calculateRotationSpeed(m_SwerveSubsystem.getHeading());
+    
+    // Log speeds to SmartDashboard
+    SmartDashboard.putNumber("Vision/XSpeed", vx);
+    SmartDashboard.putNumber("Vision/RotSpeed", rotationSpeed);
     
     // Combine both - this keeps tag centered while we rotate to be parallel
     ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(vx, 0, rotationSpeed, m_SwerveSubsystem.getHeading());
@@ -50,7 +52,7 @@ public class AlignXRotation extends Command {
   @Override
   public void end(boolean interrupted) {
     m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), m_slowMode);
-    System.out.println("=== X + ROTATION ALIGN COMPLETE ===");
+    SmartDashboard.putString("Vision/Command", interrupted ? "Interrupted" : "Complete");
   }
 
   @Override

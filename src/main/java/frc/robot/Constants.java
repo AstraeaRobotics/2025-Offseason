@@ -145,15 +145,15 @@ public final class Constants {
     public static final double kYI = 0.0;
     public static final double kYD = 0.0;
     
-    // PID Constants for Rotation alignment
-    public static final double kRotP = 0.01; // Increased to actually move
+    // PID Constants for Rotation alignment - INCREASED FROM 0.01
+    public static final double kRotP = 0.02; // Doubled to get more rotation power
     public static final double kRotI = 0.0;
-    public static final double kRotD = 0.0;
+    public static final double kRotD = 0.001; // Added small D term for stability
     
     // Alignment tolerances (separate for each axis)
     public static final double kXTolerance = 0.5; // degrees
     public static final double kYTolerance = 0.1; // degrees
-    public static final double kRotationTolerance = 3.0; // degrees - loosened for initial testing
+    public static final double kRotationTolerance = 5.0; // degrees - loosened to 5 degrees
     
     // Target TY value for Y alignment
     public static final double kTargetTY = 5.5;

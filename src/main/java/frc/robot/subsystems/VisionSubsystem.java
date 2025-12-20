@@ -18,7 +18,7 @@ public class VisionSubsystem extends SubsystemBase {
     private boolean m_hasValidTarget;
     private double m_tx;
     private double m_ty;
-    private double m_targetYaw; // Yaw component from camera-to-tag transform
+    private double m_targetYaw; 
 
     private AlignmentPosition m_alignmentPosition = AlignmentPosition.CENTER;
 
@@ -51,25 +51,22 @@ public class VisionSubsystem extends SubsystemBase {
             m_tx = LimelightHelpers.getTX(LIMELIGHT_NAME);
             m_ty = LimelightHelpers.getTY(LIMELIGHT_NAME);
             
-            // Get camera pose in target space
-            double[] camPoseTargetSpace = LimelightHelpers.getCameraPose_TargetSpace(LIMELIGHT_NAME);
+            double[] botPoseTargetSpace = LimelightHelpers.getBotPose_TargetSpace(LIMELIGHT_NAME);
             
-            // Array format: [x, y, z, roll, pitch, yaw]
-            // Let's try roll (index 3) - this might represent the rotation we care about
-            if (camPoseTargetSpace.length >= 6) {
-                // Try roll first
-                m_targetYaw = camPoseTargetSpace[3]; // Roll
+            SmartDashboard.putNumber("Vision/BotPose_TS_Length", botPoseTargetSpace.length);
+            
+            if (botPoseTargetSpace.length >= 6) {
+                SmartDashboard.putNumber("Vision/BotPose_TS_X", botPoseTargetSpace[0]);
+                SmartDashboard.putNumber("Vision/BotPose_TS_Y", botPoseTargetSpace[1]);
+                SmartDashboard.putNumber("Vision/BotPose_TS_Z", botPoseTargetSpace[2]);
+                SmartDashboard.putNumber("Vision/BotPose_TS_Roll", botPoseTargetSpace[3]);
+                SmartDashboard.putNumber("Vision/BotPose_TS_Pitch", botPoseTargetSpace[4]);
+                SmartDashboard.putNumber("Vision/BotPose_TS_Yaw", botPoseTargetSpace[5]);
                 
-                System.out.println("Camera pose target space:");
-                System.out.println("  X: " + camPoseTargetSpace[0]);
-                System.out.println("  Y: " + camPoseTargetSpace[1]);
-                System.out.println("  Z: " + camPoseTargetSpace[2]);
-                System.out.println("  Roll: " + camPoseTargetSpace[3]);
-                System.out.println("  Pitch: " + camPoseTargetSpace[4]);
-                System.out.println("  Yaw: " + camPoseTargetSpace[5]);
-                System.out.println("Using ROLL as target angle");
+                m_targetYaw = botPoseTargetSpace[4]; 
             } else {
                 m_targetYaw = 0;
+                SmartDashboard.putString("Vision/BotPose_TS_Error", "Array too short");
             }
             
         } else {
@@ -108,44 +105,35 @@ public class VisionSubsystem extends SubsystemBase {
         return -m_yController.calculate(m_ty, VisionConstants.kTargetTY);
     }
 
-    /**
-     * NEW APPROACH: Use camera pose in target space.
-     * The roll value tells us our rotation relative to the tag.
-     * We want the FRONT of the robot perpendicular to the tag.
-     * 
-     * IMPORTANT: We add 90° because we want the FRONT perpendicular,
-     * not the side. The roll=0 means side is perpendicular, so we offset by 90°.
-     */
     public double calculateRotationSpeed(double currentRobotHeading) {
         if (!m_hasValidTarget) {
+            SmartDashboard.putString("Vision/RotDebug", "No Target");
             return 0;
         }
 
-        // We want roll to be -90° (or +90°) for front to be perpendicular
-        // Target: -90 degrees
-        double targetRoll = -90.0;
-        double error = m_targetYaw - targetRoll;
+        double error = m_targetYaw;
         
-        // Normalize error to [-180, 180]
         while (error > 180) error -= 360;
         while (error < -180) error += 360;
         
-        SmartDashboard.putNumber("Vision/CurrentRoll", m_targetYaw);
-        SmartDashboard.putNumber("Vision/TargetRoll", targetRoll);
         SmartDashboard.putNumber("Vision/RotError", error);
+        SmartDashboard.putNumber("Vision/RotErrorAbs", Math.abs(error));
+        SmartDashboard.putNumber("Vision/RotTolerance", VisionConstants.kRotationTolerance);
         
         if (Math.abs(error) < VisionConstants.kRotationTolerance) {
+            SmartDashboard.putString("Vision/RotDebug", "Within Tolerance");
             return 0;
         }
 
-        // Rotate to achieve target roll
-        double speed = -m_rotationController.calculate(m_targetYaw, targetRoll);
+        double speed = m_rotationController.calculate(m_targetYaw, 0);
         
-        // Clamp the speed
+        SmartDashboard.putNumber("Vision/RotSpeedRaw", speed);
+
         double maxSpeed = 0.3;
         speed = Math.max(-maxSpeed, Math.min(maxSpeed, speed));
         
-        SmartDashboard.putNumber("Vision/RotSpeed", speed);
+        SmartDashboard.putNumber("Vision/RotSpeedClamped", speed);
+        SmartDashboard.putString("Vision/RotDebug", "Rotating - Error: " + String.format("%.2f", error));
         
         return speed;
     }
@@ -163,8 +151,7 @@ public class VisionSubsystem extends SubsystemBase {
     public boolean isAlignedRotation(double currentRobotHeading) {
         if (!m_hasValidTarget) return false;
         
-        double targetRoll = -90.0;
-        double error = m_targetYaw - targetRoll;
+        double error = m_targetYaw;
         
         while (error > 180) error -= 360;
         while (error < -180) error += 360;
@@ -187,8 +174,10 @@ public class VisionSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Vision/HasTarget", m_hasValidTarget);
         SmartDashboard.putNumber("Vision/TX", m_tx);
         SmartDashboard.putNumber("Vision/TY", m_ty);
-        SmartDashboard.putNumber("Vision/TargetYaw", m_targetYaw);
+        SmartDashboard.putNumber("Vision/TargetPitch", m_targetYaw);
         SmartDashboard.putBoolean("Vision/Aligned_X", isAlignedX());
         SmartDashboard.putBoolean("Vision/Aligned_Y", isAlignedY());
+        SmartDashboard.putBoolean("Vision/Aligned_Rotation", isAlignedRotation(0));
+        SmartDashboard.putNumber("Vision/RotError", m_targetYaw);
     }
 }
