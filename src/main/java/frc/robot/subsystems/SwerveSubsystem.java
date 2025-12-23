@@ -7,7 +7,6 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.VecBuilder;
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -154,19 +153,28 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // LimelightHelpers.SetRobotOrientation("limelight", getHeading(), 0, 0, 0, 0, 0);
-    
-    // LimelightHelpers.PoseEstimate mt2 = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2("limelight");
-    
-    // if(mt2 != null && mt2.tagCount > 0) {
-    //   swerveDrivePoseEstimator.addVisionMeasurement(
-    //     mt2.pose,
-    //     mt2.timestampSeconds,
-    //     VecBuilder.fill(0.7, 0.7, 9999999)
-    //   );
-    // }
-    
     swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
+  
+    LimelightHelpers.SetRobotOrientation("limelight", -getHeading(), 0, 0, 0, 0, 0);
+    
+    double[] botpose = LimelightHelpers.getLimelightNTDoubleArray("limelight", "botpose_orb");
+    
+    if(botpose.length >= 6) {
+        double tagCount = (botpose.length > 7) ? botpose[7] : 0;
+        
+        if(tagCount > 0) {
+            Pose2d visionPose = LimelightHelpers.toPose2D(botpose);
+            
+            double latency = (botpose.length > 6) ? botpose[6] : 0;
+            double timestamp = edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - (latency / 1000.0);
+            
+            swerveDrivePoseEstimator.addVisionMeasurement(
+                visionPose,
+                timestamp,
+                VecBuilder.fill(0.7, 0.7, 9999999)
+            );
+        }
+    }
     
     publisher.set(getPose());
     m_field.setRobotPose(getPose());
