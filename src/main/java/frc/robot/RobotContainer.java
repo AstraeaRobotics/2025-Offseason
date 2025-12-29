@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -7,15 +9,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.commands.vision.AlignXRotation;
-import frc.robot.commands.vision.AlignFull;
 import frc.robot.commands.vision.AlignX;
-import frc.robot.commands.vision.AlignXY;
+import frc.robot.commands.vision.AlignXRotation;
 import frc.robot.commands.vision.AlignY;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
@@ -44,7 +43,6 @@ public class RobotContainer {
   public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
   public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
 
-  // Xbox button mappings (similar layout to PS4)
   private final JoystickButton kB = new JoystickButton(m_Controller, XboxController.Button.kB.value);
   private final JoystickButton kX = new JoystickButton(m_Controller, XboxController.Button.kX.value);
   private final JoystickButton kA = new JoystickButton(m_Controller, XboxController.Button.kA.value);
@@ -72,26 +70,18 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    // Controller bindings
-    // A button (was Cross) - Reset Gyro
     kA.onTrue(new ResetGyro(m_SwerveSubsystem));
 
-    // X button (was Square) - Toggle Slow Mode
     kX.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
       SmartDashboard.putBoolean("SlowMode", isSlowModeOn);
     }));
 
-    // Vision alignment commands
     kB.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
     kY.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
-    kRightBumper.onTrue(new AlignXY(m_VisionSubsystem, m_SwerveSubsystem, true));
-    kLeftBumper.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
     
-    new Trigger(() -> m_Controller.getRightTriggerAxis() > 0.5)
-      .onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, isSlowModeOn));
+    kLeftBumper.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
 
-    // Robot centric drive
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
