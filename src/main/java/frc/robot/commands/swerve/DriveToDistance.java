@@ -5,8 +5,6 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -17,7 +15,6 @@ public class DriveToDistance extends Command {
   private double m_xdistanceToTravel;
   private double m_ydistanceToTravel;
   private double angle;
-  private double initialYaw;
   private double desiredHeading;
   // private PIDController xController = new PIDController(.576, 0, 0.00005);
   // private PIDController yController = new PIDController(.576, 0, 0.05);
@@ -37,7 +34,6 @@ public class DriveToDistance extends Command {
   @Override
   public void initialize() {
     this.m_swerveSubsystem.resetEncoders();
-    initialYaw = this.m_swerveSubsystem.getHeading();
     this.angle = Math.atan2(this.m_ydistanceToTravel, this.m_xdistanceToTravel);
     // this.xController.setSetpoint(Math.abs(this.m_xdistanceToTravel));
     // this.xController.setTolerance(0.01);

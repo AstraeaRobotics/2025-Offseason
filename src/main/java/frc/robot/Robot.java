@@ -1,71 +1,89 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-/**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
- */
+
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   private final RobotContainer m_robotContainer;
 
-  /**
-   * This function is run when the robot is first started up and should be used for any
-   * initialization code.
-   */
   public Robot() {
     m_robotContainer = new RobotContainer();
+    m_robotContainer.registerNamedCommands();
+    
+    SmartDashboard.putString("Robot Status", "Initialized with Superstructure");
   }
 
   @Override
   public void robotPeriodic() {
     CommandScheduler.getInstance().run();
+    
+    var superstructure = m_robotContainer.getSuperstructure();
+    SmartDashboard.putString("Superstructure State", 
+        superstructure.getCurrentState().toString());
+    SmartDashboard.putBoolean("Has Vision Target", 
+        superstructure.hasVisionTarget());
   }
 
   @Override
   public void disabledInit() {
+    SmartDashboard.putString("Robot Mode", "DISABLED");
+  }
+
+  @Override
+  public void disabledPeriodic() {
   }
 
   @Override
   public void autonomousInit() {
+    SmartDashboard.putString("Robot Mode", "AUTONOMOUS");
+    
     m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    
     if (m_autonomousCommand != null) {
-        m_autonomousCommand.schedule();
+      m_autonomousCommand.schedule();
+      SmartDashboard.putString("Auto Status", "Running: " + m_autonomousCommand.getName());
+    } else {
+      SmartDashboard.putString("Auto Status", "No auto selected");
     }
+  }
+
+  @Override
+  public void autonomousPeriodic() {
   }
 
   @Override
   public void teleopInit() {
+    SmartDashboard.putString("Robot Mode", "TELEOP");
+    
     if (m_autonomousCommand != null) {
-        m_autonomousCommand.cancel();
+      m_autonomousCommand.cancel();
+      SmartDashboard.putString("Auto Status", "Cancelled");
     }
   }
 
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+  }
 
   @Override
   public void testInit() {
+    SmartDashboard.putString("Robot Mode", "TEST");
     CommandScheduler.getInstance().cancelAll();
   }
 
   @Override
-  public void testPeriodic() {}
+  public void testPeriodic() {
+  }
 
   @Override
-  public void simulationInit() {}
+  public void simulationInit() {
+    SmartDashboard.putString("Robot Mode", "SIMULATION");
+  }
 
   @Override
-  public void simulationPeriodic() {}
-
+  public void simulationPeriodic() {
+  }
 }

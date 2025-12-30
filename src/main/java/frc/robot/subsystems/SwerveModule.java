@@ -99,6 +99,10 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+  public String getModuleName() {
+    return moduleName;
+  }
+
   public double getDistance(){
     return driveEncoder.getPosition();
   }
