@@ -1,7 +1,10 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -13,9 +16,9 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.swerve_vision_autos.DriveToPoseAlign;
 import frc.robot.commands.vision.AlignX;
 import frc.robot.commands.vision.AlignXRotation;
-import frc.robot.commands.vision.AlignY;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
@@ -78,7 +81,7 @@ public class RobotContainer {
     }));
 
     kB.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
-    kY.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kY.onTrue(new DriveToPoseAlign(m_SwerveSubsystem, m_VisionSubsystem)); 
     
     kLeftBumper.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
 
@@ -86,6 +89,19 @@ public class RobotContainer {
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
     pov90.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, DrivebaseConstants.kRobotCentricVel));
+  }
+
+  public Command driveToPoint(double x, double y, double rotationDegrees) {
+    return AutoBuilder.pathfindToPose(
+        new Pose2d(x, y, Rotation2d.fromDegrees(rotationDegrees)),
+        new PathConstraints(
+            .4,
+            .5,
+            Units.degreesToRadians(90), 
+            Units.degreesToRadians(180)  
+        ),
+        0.0 
+    );
   }
 
   public Command getAutonomousCommand() {

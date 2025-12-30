@@ -28,11 +28,9 @@ public class AlignXY extends Command {
 
   @Override
   public void execute() {
-    // Calculate both X and Y speeds simultaneously
     double vx = m_VisionSubsystem.calculateXSpeed();
     double vy = m_VisionSubsystem.calculateYSpeed();
     
-    // Combine both into a single chassis speeds command
     ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(vx, vy, 0, m_SwerveSubsystem.getHeading());
 
     m_SwerveSubsystem.drive(speeds, m_slowMode);
