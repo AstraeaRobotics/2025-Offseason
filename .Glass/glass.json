@@ -8,6 +8,8 @@
     "types": {
       "/FMSInfo": "FMSInfo",
       "/SmartDashboard/Auto choices": "String Chooser",
+      "/SmartDashboard/Field": "Field2d",
+      "/SmartDashboard/PathPlanner": "Alerts",
       "/SmartDashboard/SendableChooser[0]": "String Chooser"
     }
   },
@@ -31,7 +33,7 @@
             0.0,
             0.8500000238418579
           ],
-          "height": 690,
+          "height": 0,
           "series": [
             {
               "color": [

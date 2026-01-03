@@ -113,47 +113,43 @@ public final class Constants {
     public static final double kRobotCentricVel = 0.1;
   }
 
-  public static class VisionConstants {
-    public static final double kXP = 0.0098;
-    public static final double kXI = 0.0;
-    public static final double kXD = 0.0;
-    
-    public static final double kYP = 0.05;
-    public static final double kYI = 0.0;
-    public static final double kYD = 0.0;
+ // Add this to your Constants.java file in the VisionConstants class
 
-    public static final double kRotP = 0.02; 
-    public static final double kRotI = 0.0;
-    public static final double kRotD = 0.001;
-    
-    public static final double kXTolerance = 0.5; 
-    public static final double kYTolerance = 0.1;
-    public static final double kRotationTolerance = 5.0;
+public static class VisionConstants {
+  public static final double kXP = 0.0098;
+  public static final double kXI = 0.0;
+  public static final double kXD = 0.0;
+  
+  public static final double kYP = 0.05;
+  public static final double kYI = 0.0;
+  public static final double kYD = 0.0;
 
-    public static final double kTargetTY = 5.5;
-    
-    public enum AlignmentPosition {
-      CENTER(0.0),
-      LEFT_EDGE(-(Units.inchesToMeters(5))), 
-      RIGHT_EDGE(Units.inchesToMeters(5));  
+  public static final double kRotP = 0.014;
+  public static final double kRotI = 0.0;
+  public static final double kRotD = 0.002;
+  
+  public static final double kXTolerance = 0.5; 
+  public static final double kYTolerance = 0.1;
+  public static final double kRotationTolerance = 0.8;
 
-      private final double offsetMeters;
+  public static final double kTargetTY = 5.5;
+  
+  public enum AlignmentPosition {
+    CENTER(0.0),
+    LEFT_EDGE(-(Units.inchesToMeters(5))), 
+    RIGHT_EDGE(Units.inchesToMeters(5));  
 
-      AlignmentPosition(double offsetMeters) {
-        this.offsetMeters = offsetMeters;
-      }
+    private final double offsetMeters;
 
-      public double getOffsetMeters() {
-        return offsetMeters;
-      }
+    AlignmentPosition(double offsetMeters) {
+      this.offsetMeters = offsetMeters;
+    }
+
+    public double getOffsetMeters() {
+      return offsetMeters;
     }
   }
-
-  public static final class JustSomeConstants {
-    public static final double poseX = 1.9;
-    public static final double poseY = 1.03;
-    public static final double poseRot = -30;
-  }
+}
 
   public static final class ClimbConstants { 
 

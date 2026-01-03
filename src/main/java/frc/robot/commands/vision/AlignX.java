@@ -27,11 +27,11 @@ public class AlignX extends Command {
 
   @Override
   public void execute() {
-    double vx = m_VisionSubsystem.calculateXSpeed();
-    SmartDashboard.putNumber("Vision/XSpeed", vx);
-    
-    ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(vx, 0, 0, m_SwerveSubsystem.getHeading());
-    m_SwerveSubsystem.drive(speeds, m_slowMode);
+      double vx = m_VisionSubsystem.calculateXSpeed();
+      SmartDashboard.putNumber("Vision/XSpeed", vx);
+      
+      ChassisSpeeds speeds = new ChassisSpeeds(0, -vx, 0);
+      m_SwerveSubsystem.drive(speeds, m_slowMode);
   }
 
   @Override

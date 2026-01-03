@@ -6,7 +6,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -16,7 +16,6 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.commands.swerve_vision_autos.DriveToPoseAlign;
 import frc.robot.commands.vision.AlignX;
 import frc.robot.commands.vision.AlignXRotation;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -30,7 +29,7 @@ public class RobotContainer {
   private final SwerveSubsystem m_SwerveSubsystem = new SwerveSubsystem();
   private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
 
-  private final XboxController m_Controller = new XboxController(0);
+  private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
 
   public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
@@ -46,12 +45,13 @@ public class RobotContainer {
   public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
   public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
 
-  private final JoystickButton kB = new JoystickButton(m_Controller, XboxController.Button.kB.value);
-  private final JoystickButton kX = new JoystickButton(m_Controller, XboxController.Button.kX.value);
-  private final JoystickButton kA = new JoystickButton(m_Controller, XboxController.Button.kA.value);
-  private final JoystickButton kY = new JoystickButton(m_Controller, XboxController.Button.kY.value);
-  private final JoystickButton kRightBumper = new JoystickButton(m_Controller, XboxController.Button.kRightBumper.value);
-  private final JoystickButton kLeftBumper = new JoystickButton(m_Controller, XboxController.Button.kLeftBumper.value);
+  // PS4 Controller Buttons (mapped to similar Xbox positions)
+  private final JoystickButton kCircle = new JoystickButton(m_Controller, PS4Controller.Button.kCircle.value);
+  private final JoystickButton kSquare = new JoystickButton(m_Controller, PS4Controller.Button.kSquare.value);
+  private final JoystickButton kCross = new JoystickButton(m_Controller, PS4Controller.Button.kCross.value);
+  private final JoystickButton kTriangle = new JoystickButton(m_Controller, PS4Controller.Button.kTriangle.value);
+  private final JoystickButton kR1 = new JoystickButton(m_Controller, PS4Controller.Button.kR1.value);
+  private final JoystickButton kL1 = new JoystickButton(m_Controller, PS4Controller.Button.kL1.value);
 
   private final POVButton pov0 = new POVButton(m_Controller, 0);
   private final POVButton pov90 = new POVButton(m_Controller, 90);
@@ -73,18 +73,22 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
-    kA.onTrue(new ResetGyro(m_SwerveSubsystem));
+    // Cross button (X on PS4) - Reset Gyro
+    kCross.onTrue(new ResetGyro(m_SwerveSubsystem));
 
-    kX.onTrue(new InstantCommand(() -> {
+    // Square button - Toggle Slow Mode
+    kSquare.onTrue(new InstantCommand(() -> {
       isSlowModeOn = !isSlowModeOn;
       SmartDashboard.putBoolean("SlowMode", isSlowModeOn);
     }));
 
-    kB.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
-    kY.onTrue(new DriveToPoseAlign(m_SwerveSubsystem, m_VisionSubsystem)); 
+    // Circle button (O on PS4) - Align X
+    kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
     
-    kLeftBumper.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
+    // L1 (Left Bumper) - Align X Rotation
+    kL1.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
 
+    // D-Pad controls (POV)
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
