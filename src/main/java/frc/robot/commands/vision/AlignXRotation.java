@@ -1,6 +1,5 @@
 package frc.robot.commands.vision;
 
-import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -13,6 +12,8 @@ public class AlignXRotation extends Command {
   private final boolean m_slowMode;
   
   private int m_stableCount = 0;
+  // Increased threshold for more stable completion
+  private static final int FINISH_THRESHOLD = 25;  // 0.5 seconds at 50Hz
 
   public AlignXRotation(VisionSubsystem visionSubsystem, SwerveSubsystem swerveSubsystem, boolean slowMode) {
     this.m_VisionSubsystem = visionSubsystem;
@@ -25,50 +26,25 @@ public class AlignXRotation extends Command {
   @Override
   public void initialize() {
     m_stableCount = 0;
-    SmartDashboard.putString("Vision/Command", "X+Rotation Align Started");
+    SmartDashboard.putString("Vision/Command", "AlignXRotation Started");
   }
 
   @Override
   public void execute() {
-    double rawVx = m_VisionSubsystem.calculateXSpeed();
-    double rawRotSpeed = m_VisionSubsystem.calculateRotationSpeed(m_SwerveSubsystem.getHeading());
-    
-    double rotError = Math.abs(SmartDashboard.getNumber("Vision/RotError", 0));
-    double xError = Math.abs(SmartDashboard.getNumber("Vision/TX", 0));
-    
-    double rotationPriority = MathUtil.clamp(rotError / 5.0, 0.0, 1.0);
-    double strafePriority = MathUtil.clamp(xError / 5.0, 0.0, 1.0);
-    
-    double vx = rawVx * strafePriority;
-    double rotSpeed = rawRotSpeed * rotationPriority;
-    
-    if (rotError > 2.0) {
-        vx *= 0.3;
+    // Check for valid target first
+    if (!m_VisionSubsystem.hasValidTarget()) {
+      m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), m_slowMode);
+      return;
     }
     
-    if (xError > 2.0) {
-        rotSpeed *= 0.5;
-    }
+    double vx = m_VisionSubsystem.calculateXSpeed();
+    double rotSpeed = m_VisionSubsystem.calculateRotationSpeed(m_SwerveSubsystem.getHeading());
     
-    if (rotError < 1.5) {
-      rotSpeed *= 0.6;
-    }
+    SmartDashboard.putNumber("Vision/CMD_XSpeed", vx);
+    SmartDashboard.putNumber("Vision/CMD_RotSpeed", rotSpeed);
     
-    if (xError < 1.0) {
-      vx *= 0.6;
-    }
-    
-    SmartDashboard.putNumber("Vision/XSpeed", vx);
-    SmartDashboard.putNumber("Vision/RotSpeed", rotSpeed);
-    SmartDashboard.putNumber("Vision/RotationPriority", rotationPriority);
-    SmartDashboard.putNumber("Vision/StrafePriority", strafePriority);
-    SmartDashboard.putNumber("Vision/RotError", rotError);
-    SmartDashboard.putNumber("Vision/XError", xError);
-    
-    boolean rotAligned = m_VisionSubsystem.isAlignedRotation(m_SwerveSubsystem.getHeading());
-    boolean xAligned = m_VisionSubsystem.isAlignedX();
-    
-    if (rotAligned && xAligned) {
+    // Both speeds at 0 means we're within acceptable range
+    if (vx == 0 && rotSpeed == 0) {
       m_stableCount++;
     } else {
       m_stableCount = 0;
@@ -88,9 +64,15 @@ public class AlignXRotation extends Command {
 
   @Override
   public boolean isFinished() {
-    boolean tightlyAligned = m_VisionSubsystem.isAlignedX() && 
-                             m_VisionSubsystem.isAlignedRotation(m_SwerveSubsystem.getHeading());
+    // Must have valid target to finish successfully
+    if (!m_VisionSubsystem.hasValidTarget()) {
+      return false;
+    }
     
-    return tightlyAligned && m_stableCount >= 25;
+    boolean aligned = m_VisionSubsystem.isAlignedX() && 
+                      m_VisionSubsystem.isAlignedRotation(m_SwerveSubsystem.getHeading());
+    
+    // Require sustained alignment to prevent premature completion
+    return aligned && m_stableCount >= FINISH_THRESHOLD;
   }
 }
