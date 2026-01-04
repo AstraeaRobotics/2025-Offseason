@@ -5,20 +5,20 @@
 package frc.robot.commands.vision;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
-import frc.robot.utils.SwerveUtil;
 
 public class AlignY extends Command {
-  /** Creates a new AlignY. */
-
   VisionSubsystem m_VisionSubsystem;
   SwerveSubsystem m_SwerveSubsystem;
   private final boolean m_slowMode;
+  
+  private int m_finishCounter = 0;
+  private static final int FINISH_THRESHOLD = 10; // 0.2 seconds at 50Hz
 
   public AlignY(VisionSubsystem m_VisionSubsystem, SwerveSubsystem m_SwerveSubsystem, boolean m_slowMode) {
-    // Use addRequirements() here to declare subsystem dependencies.
     this.m_SwerveSubsystem = m_SwerveSubsystem;
     this.m_VisionSubsystem = m_VisionSubsystem;
     this.m_slowMode = m_slowMode;
@@ -26,28 +26,42 @@ public class AlignY extends Command {
     addRequirements(m_SwerveSubsystem, m_VisionSubsystem);
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    m_finishCounter = 0;
+    SmartDashboard.putString("Vision/Command", "Y Align Started");
+  }
 
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     double vy = m_VisionSubsystem.calculateYSpeed();
-    ChassisSpeeds speeds = SwerveUtil.driveInputToChassisSpeeds(0, vy, 0, m_SwerveSubsystem.getHeading());
-
+    SmartDashboard.putNumber("Vision/CMD_YSpeed", vy);
+    
+    // Use robot-relative speeds directly - positive X is forward
+    ChassisSpeeds speeds = new ChassisSpeeds(vy, 0, 0);
     m_SwerveSubsystem.drive(speeds, m_slowMode);
   }
 
-  // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
     m_SwerveSubsystem.drive(new ChassisSpeeds(0, 0, 0), m_slowMode);
+    SmartDashboard.putString("Vision/Command", interrupted ? "Interrupted" : "Complete");
   }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return m_VisionSubsystem.isAlignedY();
+    if (!m_VisionSubsystem.hasValidTarget()) {
+      return false;
+    }
+    
+    if (m_VisionSubsystem.isAlignedY()) {
+      m_finishCounter++;
+    } else {
+      m_finishCounter = 0;
+    }
+    
+    SmartDashboard.putNumber("Vision/Y_FinishCounter", m_finishCounter);
+    
+    return m_finishCounter >= FINISH_THRESHOLD;
   }
 }

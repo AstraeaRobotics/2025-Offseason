@@ -115,33 +115,24 @@ public final class Constants {
   }
 
   public static class VisionConstants {
-    // X-axis PID constants (horizontal alignment)
-    // Reduced D term to minimize derivative kick
-    public static final double kXP = 0.006;
+    public static final double kXP = 0.0098;
     public static final double kXI = 0.0;
-    public static final double kXD = 0.0;  // Reduced from 0.0005 to eliminate jitter
+    public static final double kXD = 0.0; 
     
-    // Y-axis PID constants (distance alignment)
     public static final double kYP = 0.05;
     public static final double kYI = 0.0;
     public static final double kYD = 0.0;
 
-    // Rotation PID constants (angular alignment)
-    // Reduced D term to minimize oscillation
     public static final double kRotP = 0.01;
     public static final double kRotI = 0.0;
-    public static final double kRotD = 0.0;  // Reduced from 0.001 to eliminate jitter
+    public static final double kRotD = 0.0;
     
-    // Tolerance values - increased for stability
-    // The code uses 1.5x and 2x multipliers for dead bands
-    public static final double kXTolerance = 0.5;         // degrees (increased from 0.3)
-    public static final double kYTolerance = 0.2;         // degrees (increased from 0.1)
-    public static final double kRotationTolerance = 1.0;  // degrees (increased from 0.5)
+    public static final double kXTolerance = 0.5;         // degrees 
+    public static final double kYTolerance = 0.2;         // degrees 
+    public static final double kRotationTolerance = 1.0;  // degrees
 
-    // Target Y value for distance control
     public static final double kTargetTY = 5.5;
-    
-    // Alignment position enum for different scoring positions
+
     public enum AlignmentPosition {
       CENTER(0.0),
       LEFT_EDGE(-(Units.inchesToMeters(5))), 
