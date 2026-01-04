@@ -13,7 +13,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.autos.DriveToPoseAlign;
+import frc.robot.autos.DriveToTag;
 import frc.robot.autos.ReturnHome;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
@@ -83,8 +83,6 @@ public class RobotContainer {
       SmartDashboard.putBoolean("SlowMode", isSlowModeOn);
     }));
 
-    kTriangle.onTrue(new DriveToPoseAlign(m_SwerveSubsystem, m_VisionSubsystem, 1.95, 0.82, -21));
-
     kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
     
     kR1.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
@@ -93,8 +91,17 @@ public class RobotContainer {
 
     kL2.onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, true));
 
-    kOperator1.onTrue(new ReturnHome(m_SwerveSubsystem, m_VisionSubsystem, 0.28, 0.39, -.51));
+    kOperator1.onTrue(new ReturnHome(m_SwerveSubsystem, m_VisionSubsystem));
 
+    //tag alignment
+    kOperator2.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,0));
+    kOperator3.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,1));
+    kOperator4.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,2));
+    kOperator5.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,3));
+    kOperator6.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,4));
+    kOperator7.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,5));
+
+    //robot centric moving
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));

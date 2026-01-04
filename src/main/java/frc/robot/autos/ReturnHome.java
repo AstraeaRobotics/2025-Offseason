@@ -27,13 +27,13 @@ public class ReturnHome extends SequentialCommandGroup {
     Units.degreesToRadians(180) 
   );
 
-  public ReturnHome(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem, double x, double y, double rot) {
+  public ReturnHome(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
 
       AutoBuilder.pathfindToPose(
-        new Pose2d(x, y, Rotation2d.fromDegrees(rot)), 
+        new Pose2d(0.285, 0.43, Rotation2d.fromDegrees(0.5)), 
         CONSTRAINTS,
         0.0
       )

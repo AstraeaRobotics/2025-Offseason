@@ -24,10 +24,8 @@ public class VisionSubsystem extends SubsystemBase {
 
     private AlignmentPosition m_alignmentPosition = AlignmentPosition.CENTER;
 
-    // Minimum command threshold - prevents tiny jittery commands
     private static final double MIN_COMMAND = 0.02;
     
-    // Tag-specific TY targets
     private static final double[] TAG_TY_TARGETS = {
         1.75,  // Tag 0
         1.82,  // Tag 1
@@ -93,15 +91,12 @@ public class VisionSubsystem extends SubsystemBase {
         double targetOffset = m_alignmentPosition.getOffsetMeters();
         double error = m_tx - targetOffset;
         
-        // Calculate PID output
         double speed = -m_xController.calculate(m_tx, targetOffset);
         
-        // Apply minimum threshold to prevent jitter
         if (Math.abs(speed) < MIN_COMMAND) {
             speed = 0;
         }
         
-        // Slow down as we approach
         double maxSpeed = 0.25;
         if (Math.abs(error) < 2.0) maxSpeed = 0.15;
         if (Math.abs(error) < 1.0) maxSpeed = 0.10;
@@ -141,15 +136,10 @@ public class VisionSubsystem extends SubsystemBase {
         return speed;
     }
     
-    /**
-     * Gets the target TY value based on the current fiducial ID
-     * Falls back to default if tag ID is invalid
-     */
     private double getTargetTY() {
         if (m_fiducialID >= 0 && m_fiducialID < TAG_TY_TARGETS.length) {
             return TAG_TY_TARGETS[m_fiducialID];
         }
-        // Fallback to default if tag ID is out of range
         return VisionConstants.kTargetTY;
     }
 
@@ -177,10 +167,6 @@ public class VisionSubsystem extends SubsystemBase {
         return speed;
     }
 
-    /**
-     * Check if X is aligned - uses SAME logic as calculateXSpeed
-     * This ensures command finishes when speed becomes 0
-     */
     public boolean isAlignedX() {
         if (!m_hasValidTarget) return false;
         
@@ -188,7 +174,6 @@ public class VisionSubsystem extends SubsystemBase {
         double error = m_tx - targetOffset;
         double rawSpeed = Math.abs(m_xController.calculate(m_tx, targetOffset));
         
-        // Aligned if error is small OR if PID output is below threshold
         boolean withinTolerance = Math.abs(error) < m_xController.getPositionTolerance();
         boolean commandTooSmall = rawSpeed < MIN_COMMAND;
         

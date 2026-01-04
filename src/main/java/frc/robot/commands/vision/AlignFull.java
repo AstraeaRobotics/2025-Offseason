@@ -10,12 +10,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
-/**
- * Fully aligns robot to AprilTag:
- * - X alignment (left/right centering)
- * - Y alignment (forward/back to target distance)
- * - Rotation alignment (angular alignment to tag)
- */
 public class AlignFull extends Command {
   private final VisionSubsystem m_VisionSubsystem;
   private final SwerveSubsystem m_SwerveSubsystem;
