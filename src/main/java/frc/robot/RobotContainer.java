@@ -21,6 +21,7 @@ import frc.robot.autos.DynamicTagSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.swerve.TurnToAngle;
 import frc.robot.commands.vision.AlignFull;
 import frc.robot.commands.vision.AlignX;
 import frc.robot.commands.vision.AlignXRotation;
@@ -29,8 +30,6 @@ import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.subsystems.VisionSubsystem;
 
 public class RobotContainer {
-  private static final String LIMELIGHT_NAME = "limelight";
-  
   private final SwerveSubsystem m_SwerveSubsystem = new SwerveSubsystem();
   private final VisionSubsystem m_VisionSubsystem = new VisionSubsystem();
 
@@ -102,11 +101,9 @@ public class RobotContainer {
     tag2Chooser.addOption("Tag 4", 4);
     tag2Chooser.addOption("Tag 5", 5);
     
-    // Publish to dashboard
     SmartDashboard.putData("Tag 1", tag1Chooser);
     SmartDashboard.putData("Tag 2", tag2Chooser);
     
-    // Initial state - RED (both not selected)
     SmartDashboard.putBoolean("Auto Ready", false);
   }
 
@@ -118,8 +115,11 @@ public class RobotContainer {
       SmartDashboard.putBoolean("SlowMode", isSlowModeOn);
     }));
 
+    kTriangle.onTrue(new ReturntoAbsoluteHome(m_SwerveSubsystem, m_VisionSubsystem));
+
     kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
     kR1.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
+    kR2.onTrue(new TurnToAngle(m_SwerveSubsystem, 45));
     kL1.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
     kL2.onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, true));
 
@@ -132,8 +132,6 @@ public class RobotContainer {
     kOperator5.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 3));
     kOperator6.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 4));
     kOperator7.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 5));
-
-    kOperator12.onTrue(new ReturntoAbsoluteHome(m_SwerveSubsystem, m_VisionSubsystem));
 
     // Robot centric moving
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));

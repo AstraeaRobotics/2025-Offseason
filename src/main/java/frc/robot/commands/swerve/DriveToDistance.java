@@ -5,7 +5,6 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivebaseConstants;
@@ -70,6 +69,8 @@ public class DriveToDistance extends Command {
     // SmartDashboard.putNumber("Encoder Position X: ", this.m_swerveSubsystem.getEncoderPosition() * Math.cos(angle));
     // SmartDashboard.putNumber("Encoder Position Y: ", this.m_swerveSubsystem.getEncoderPosition() * Math.sin(angle));
     // SmartDashboard.putNumber("drift output", rotationController.calculate(this.m_swerveSubsystem.getHeading(), 0));
+
+    SmartDashboard.putNumber("Heading Change", this.m_swerveSubsystem.getHeading() - initialYaw);
   }
 
   @Override

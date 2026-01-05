@@ -14,7 +14,6 @@ import frc.robot.subsystems.VisionSubsystem;
 
 public class DynamicTagSequence extends SequentialCommandGroup {
   
-  // Tag positions from your DriveToTag.java
   private static final double[][] TAG_POSITIONS = {
     {1.544, 0.856, -90},   // Tag 0
     {1.32, 1.178, 90},   // Tag 1
@@ -72,10 +71,7 @@ public class DynamicTagSequence extends SequentialCommandGroup {
   private static boolean isValidTag(int tagID) {
     return tagID >= 0 && tagID <= 5;
   }
-  
-  /**
-   * Creates a command to pathfind to the specified tag
-   */
+
   private static Command createPathToTag(int tagID) {
     double[] pos = TAG_POSITIONS[tagID];
     return AutoBuilder.pathfindToPose(
