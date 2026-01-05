@@ -17,7 +17,7 @@ import frc.robot.subsystems.VisionSubsystem;
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class ReturnHome extends SequentialCommandGroup {
+public class ReturntoAbsoluteHome extends SequentialCommandGroup {
   /** Creates a new ReturnHome. */
 
   private static final PathConstraints CONSTRAINTS = new PathConstraints(
@@ -27,13 +27,13 @@ public class ReturnHome extends SequentialCommandGroup {
     Units.degreesToRadians(180) 
   );
 
-  public ReturnHome(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem) {
+  public ReturntoAbsoluteHome(SwerveSubsystem m_SwerveSubsystem, VisionSubsystem m_VisionSubsystem) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
 
       AutoBuilder.pathfindToPose(
-        new Pose2d(0.285, 0.43, Rotation2d.fromDegrees(0)), 
+        new Pose2d(-1.07, 1.31, Rotation2d.fromDegrees(0)), 
         CONSTRAINTS,
         0.0
       )

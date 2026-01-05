@@ -22,11 +22,11 @@ public class DriveToTag extends SequentialCommandGroup {
   );
 
   private static final double[][] TAG_POSITIONS = {
-    {1.544, 0.856, -91},  // Tag 0
-    {1.32, 1.178, 85.9},  // Tag 1
-    {2.09, 1.12, 87.4},    // Tag 2 
-    {3.179, 1.30, 86.8},     // Tag 3 
-    {3.587, 1, -3.87},    // Tag 4 
+    {1.544, 0.856, -90},  // Tag 0
+    {1.32, 1.178, 90},  // Tag 1
+    {2.09, 1.12, 90},    // Tag 2 
+    {3.179, 1.30, 90},     // Tag 3 
+    {3.587, 1, 0},    // Tag 4 
     {2.42, 0.81, -56.9}       // Tag 5 
   };
 

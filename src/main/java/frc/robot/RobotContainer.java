@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -15,6 +16,8 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.autos.DriveToTag;
 import frc.robot.autos.ReturnHome;
+import frc.robot.autos.ReturntoAbsoluteHome;
+import frc.robot.autos.DynamicTagSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
@@ -33,6 +36,10 @@ public class RobotContainer {
 
   private final PS4Controller m_Controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
+
+  // Tag choosers
+  private final SendableChooser<Integer> tag1Chooser = new SendableChooser<>();
+  private final SendableChooser<Integer> tag2Chooser = new SendableChooser<>();
 
   public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
   public static final JoystickButton kOperator2 = new JoystickButton(operatorGamepad, 2);
@@ -72,7 +79,35 @@ public class RobotContainer {
       () -> isSlowModeOn  
     ));
 
+    setupAutoSelector();
     configureBindings();
+  }
+
+  private void setupAutoSelector() {
+    // Tag 1 selector - DEFAULT IS NONE
+    tag1Chooser.setDefaultOption("None", -1);
+    tag1Chooser.addOption("Tag 0", 0);
+    tag1Chooser.addOption("Tag 1", 1);
+    tag1Chooser.addOption("Tag 2", 2);
+    tag1Chooser.addOption("Tag 3", 3);
+    tag1Chooser.addOption("Tag 4", 4);
+    tag1Chooser.addOption("Tag 5", 5);
+    
+    // Tag 2 selector - DEFAULT IS NONE
+    tag2Chooser.setDefaultOption("None", -1);
+    tag2Chooser.addOption("Tag 0", 0);
+    tag2Chooser.addOption("Tag 1", 1);
+    tag2Chooser.addOption("Tag 2", 2);
+    tag2Chooser.addOption("Tag 3", 3);
+    tag2Chooser.addOption("Tag 4", 4);
+    tag2Chooser.addOption("Tag 5", 5);
+    
+    // Publish to dashboard
+    SmartDashboard.putData("Tag 1", tag1Chooser);
+    SmartDashboard.putData("Tag 2", tag2Chooser);
+    
+    // Initial state - RED (both not selected)
+    SmartDashboard.putBoolean("Auto Ready", false);
   }
 
   private void configureBindings() {
@@ -84,24 +119,23 @@ public class RobotContainer {
     }));
 
     kCircle.onTrue(new AlignX(m_VisionSubsystem, m_SwerveSubsystem, true));
-    
     kR1.onTrue(new AlignY(m_VisionSubsystem, m_SwerveSubsystem, true));
-
     kL1.onTrue(new AlignXRotation(m_VisionSubsystem, m_SwerveSubsystem, true));
-
     kL2.onTrue(new AlignFull(m_VisionSubsystem, m_SwerveSubsystem, true));
 
     kOperator1.onTrue(new ReturnHome(m_SwerveSubsystem, m_VisionSubsystem));
 
-    //tag alignment
-    kOperator2.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,0));
-    kOperator3.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,1));
-    kOperator4.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,2));
-    kOperator5.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,3));
-    kOperator6.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,4));
-    kOperator7.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem,5));
+    // Manual tag alignment buttons
+    kOperator2.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 0));
+    kOperator3.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 1));
+    kOperator4.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 2));
+    kOperator5.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 3));
+    kOperator6.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 4));
+    kOperator7.onTrue(new DriveToTag(m_SwerveSubsystem, m_VisionSubsystem, 5));
 
-    //robot centric moving
+    kOperator12.onTrue(new ReturntoAbsoluteHome(m_SwerveSubsystem, m_VisionSubsystem));
+
+    // Robot centric moving
     pov0.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, DrivebaseConstants.kRobotCentricVel, 0));
     pov270.whileTrue(new DriveRobotCentric(m_SwerveSubsystem, 0, -DrivebaseConstants.kRobotCentricVel));
@@ -111,17 +145,23 @@ public class RobotContainer {
   public Command driveToPoint(double x, double y, double rotationDegrees) {
     return AutoBuilder.pathfindToPose(
         new Pose2d(x, y, Rotation2d.fromDegrees(rotationDegrees)),
-        new PathConstraints(
-            .4,
-            .5,
-            Units.degreesToRadians(90), 
-            Units.degreesToRadians(180)  
-        ),
+        new PathConstraints(.4, .5, Units.degreesToRadians(90), Units.degreesToRadians(180)),
         0.0 
     );
   }
 
   public Command getAutonomousCommand() {
-    return null;
+    int tag1 = tag1Chooser.getSelected();
+    int tag2 = tag2Chooser.getSelected();
+    
+    return new DynamicTagSequence(m_SwerveSubsystem, m_VisionSubsystem, tag1, tag2);
+  }
+  
+  public void updateAutoStatus() {
+    int tag1 = tag1Chooser.getSelected();
+    int tag2 = tag2Chooser.getSelected();
+    
+    boolean bothSelected = DynamicTagSequence.areTagsValid(tag1, tag2);
+    SmartDashboard.putBoolean("Auto Ready", bothSelected);
   }
 }
